@@ -1,0 +1,56 @@
+{
+  "status": "ok",
+  "n_subjects": 8,
+  "n_motifs": 6,
+  "instability_craving_pearson": 0.7628202606722142,
+  "subject_rows": [
+    {
+      "subject_id": "sub-0001",
+      "n_windows": 13,
+      "instability": 0.4590971127571301,
+      "craving_var": 0.32102576123213006
+    },
+    {
+      "subject_id": "sub-0002",
+      "n_windows": 13,
+      "instability": 0.5234626755382247,
+      "craving_var": 0.9341181851624102
+    },
+    {
+      "subject_id": "sub-0003",
+      "n_windows": 13,
+      "instability": 0.4556950444080288,
+      "craving_var": 0.3560323168416894
+    },
+    {
+      "subject_id": "sub-0004",
+      "n_windows": 13,
+      "instability": 0.4932609000239234,
+      "craving_var": 0.18471529849824284
+    },
+    {
+      "subject_id": "sub-0005",
+      "n_windows": 13,
+      "instability": 0.5094271733346596,
+      "craving_var": 0.6720823770512635
+    },
+    {
+      "subject_id": "sub-0006",
+      "n_windows": 13,
+      "instability": 0.42845299358258665,
+      "craving_var": 0.458950181636282
+    },
+    {
+      "subject_id": "sub-0007",
+      "n_windows": 13,
+      "instability": 0.5268384022922563,
+      "craving_var": 0.9512032163551805
+    },
+    {
+      "subject_id": "sub-0008",
+      "n_windows": 13,
+      "instability": 0.43722303784821714,
+      "craving_var": 0.07332996061048686
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "status": "blocked_missing_manifest",
+  "manifest": "results/phase3_step68_intake/subject_manifest.csv",
+  "issues": [
+    "Manifest not found: results/phase3_step68_intake/subject_manifest.csv"
+  ]
+}

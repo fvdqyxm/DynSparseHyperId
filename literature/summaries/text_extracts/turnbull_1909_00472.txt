@@ -1,0 +1,6655 @@
+Latent Space Modelling of Hypergraph Data
+Kathryn Turnbull1 , Simón Lunagómez1 , Christopher Nemeth1 , and Edoardo
+Airoldi2
+
+arXiv:1909.00472v3 [stat.ME] 2 Nov 2021
+
+1
+
+Department of Mathematics and Statistics, Lancaster University
+2
+Fox School of Business, Temple University
+
+Abstract
+The increasing prevalence of relational data describing interactions among a target population has motivated a wide literature on statistical network analysis. In many applications,
+interactions may involve more than two members of the population and this data is more
+appropriately represented by a hypergraph. In this paper, we present a model for hypergraph data which extends the well established latent space approach for graphs and, by
+drawing a connection to constructs from computational topology, we develop a model whose
+likelihood is inexpensive to compute. A delayed-acceptance MCMC scheme is proposed to
+obtain posterior samples and we rely on Bookstein coordinates to remove the identifiability issues associated with the latent representation. We theoretically examine the degree
+distribution of hypergraphs generated under our framework and, through simulation, we
+investigate the flexibility of our model and consider estimation of predictive distributions.
+Finally, we explore the application of our model to two real-world datasets.
+Keywords: Hypergraphs, Latent Space Networks, Simplicial complex, Bayesian Inference, Statistical Network Analysis.
+
+1
+
+Introduction
+
+A hypergraph (Bretto, 2013) describes interactions which occur among arbitrary subsets of a
+population of interest. This data structure is comprised of a node set, which indexes the population, and a hyperedge set, which indicates which members of the population interact. Examples
+of hypergraphs occur in image co-tagging (see Figure 1a), where hyperedges indicate users who
+appear in a same photograph in an online platform, and coauthorship (see Figure 1c), where
+hyperedges represent the set of authors who collaborated on an academic article. A key feature
+of a hypergraph representation is that is able to express higher-order interactions and, whilst
+these data could be analysed according to an extensive graph modelling literature (see Kolaczyk
+(2009), Goldenberg et al. (2010), Barabási and Pósfai (2016) and Salter-Townshend et al. (2012)),
+this results in a loss of structural information which cannot be recovered (see Figures 1c and
+1d). This represents the main motivation of this article where we develop a novel model for
+hypergraph data, detail a procedure for inference and present theoretical results.
+More formally, a hypergraph G = (V, E) consists of a set of N node labels V and M hyperedges E, where e ∈ E contains no repeated elements and e ⊆ V (see Figure 1c). This data type
+can also be equivalently represented as a bipartite graph with an (N × M ) adjacency tensor in
+which each hyperedge is indexed by a node and an edge from a population node to a hyperedge
+
+1
+
+(a) Photographs from Zhong et al. (2018)
+8
+●
+
+7
+●
+8
+●
+
+4
+●
+5
+●
+9
+●
+
+3
+●
+
+2
+●
+
+3
+
+1
+
+4
+
+(b) Hypergraph from photographs in Figure 1a.
+11
+●
+
+7
+●
+
+6
+●
+
+2
+
+6
+●
+
+2
+●
+
+1
+●
+
+3
+●
+
+11
+●
+
+5
+●
+
+1
+●
+
+10
+●
+
+10
+●
+
+9
+●
+
+4
+●
+
+8
+●
+7
+●
+6
+●
+10
+●
+9
+●
+4
+●
+5
+●
+3
+●
+2
+●
+1
+●
+11
+●
+
+e5
+●
+e10
+●
+e7
+●
+e6
+●
+e4
+●
+e2
+●
+e3
+●
+e9
+●
+e1
+●
+e8
+●
+
+(c) Hypergraph subsample ob- (d) Projection of hypergraph (e) Bipartite representation of hytained via random walk.
+from Figure 1c onto a graph.
+pergraph from Figure 1c.
+
+Figure 1: Examples of hypergraph datasets. Figure 1b represents co-tagging data as a hypergraph
+and Figure 1c shows a subsample of the coauthorship network of Ji and Jin (2016). All but Figure
+1a have been made using R packages HyperG (Marchette, 2021) and igraph (Csardi and Nepusz,
+2006).
+node indicates presence in a hyperedge (see Figure 1e). Whilst a significant portion of the existing literature relies on the bipartite representation, we focus on the former representation since
+it allows us to develop a model which allows for an arbitrary number of hyperedges by avoiding
+conditioning on M .
+We consider extending the latent distance model of Hoff et al. (2002) to the hypergraph
+setting using the representation in Figure 1c. In this approach, a low-dimensional coordinate is
+associated with each node and nodes whose latent coordinates are close in terms of Euclidean
+distance are assumed more likely to share a tie. This modelling choice is appealing since the latent
+representation offers an intuitive visualisation of the data, encourages transitive relationships
+due to the metric property of Euclidean distance and allows control over the joint distribution
+of subgraph counts. Furthermore, once estimated, models of this type allow a practitioner to
+quantify uncertainty in interaction probabilities and predict future connections. When developing
+our model, we wish to take advantage of hypergraph analogues of these properties and we focus
+on the following inferential questions.
+(Q1) “How can we determine an intuitive visualisation of an observed hypergraph?”
+(Q2) “How do we expect new nodes to interact with the observed hypergraph relationships?”
+Latent space network models are well-established in the graph modelling literature and have
+been extended to an array of network data types (McCormick and Zheng, 2015; Kim et al.,
+2018; Salter-Townshend and McCormick, 2017; D’Angelo et al., 2019) and address inferential
+questions ranging from community detection (Handcock et al., 2007; Krivitsky et al., 2009) to
+graph comparisons (Asta and Shalizi, 2015; Tang et al., 2017). Whilst we do not consider these
+questions in this article, they suggest promising avenues for future work and further motivate
+our interest in this class of models.
+There exists a growing literature concerned with hypergraph modelling (Battiston et al.,
+2020), and several well-adopted graph models have been extended to the bipartite setting. Ex2
+
+amples include exponential random graphs (Wang et al., 2013), blockmodels (Doreian et al.,
+2004), preferential attachment (Ergün, 2002; Guillaume and Latapy, 2006), configuration models
+(Fosdick et al., 2018) and latent space network models (Friel et al., 2016; Kitsak et al., 2017;
+Vasques Filho and O’Neale, 2020). We note that, in contrast to our approach, these models
+assume that the number of hyperedges M is known and fixed.
+Examples of models that are appropriate for the full generality of hypergraphs include the
+β model of Stasi et al. (2014), models based on preferential attachment (Wang et al., 2010; Liu
+et al., 2013) and the clustering-based model of Ng and Murphy (2021). A rich set of models
+have also been developed for uniform and simplicial classes of hypergraphs. In a m-uniform
+hypergraph all hyperedges contain exactly m elements, and extensions of stochastic blockmodels
+(see Ghoshdastidar and Dukkipati (2017), Kim et al. (2018), Chien et al. (2018), Pal and Zhu
+(2019), Ahn et al. (2019)) and graphons (Balasubramanian, 2021) have been studied for this
+hypergraph type. Simplicial hypergraphs, or rather simplicial complexes (see Edelsbrunner and
+Harer (2010) for an introduction), are a significant class of hypergraphs in which the presence of
+a hyperedge implies the presence of all subsets of that hyperedge. There is a rich literature that
+deals with modelling simplicial complexes and this includes an analogue of exponential random
+graphs (Zuev et al., 2015), preferential attachment based models (Bianconi and Rahmede, 2017;
+Wu et al., 2015), simplicial configuration models (Courtney and Bianconi, 2016; Young et al.,
+2017) and models based on recursive procedures in which hyperedges are included with increasing order (Kahle, 2014; Costa and Farber, 2016). We refer the reader to recent reviews for an
+in-depth discussion of random simplicial complexes (Kahle, 2014, 2017) and highlight here the
+work on geometric simplicial complexes (Bobrowski and Kahle, 2018; Bobrowski and Oliveira,
+2019) which is most related to our proposed procedure. However, we note that our focus on inference marks a clear distinction between our work and much of the existing literature. Finally,
+we comment that simplicial complexes appear more broadly in the statistics literature (Pronzato et al., 2019; Lunagómez et al., 2017; Chazal and Michel, 2017) and that our terminology
+‘simplicial hypergraph’ is non-standard in this literature.
+The main contributions of this article are as follows. First, using the representation shown in
+Figure 1c, we develop a computationally tractable latent space model for non-simplicial hypergraph data by relying on tools from computational geometry (Edelsbrunner and Harer, 2010).
+Second, to remove non-identifiability present in our model, we define the latent representation on
+the space of Bookstein coordinates which have so far not been explored in this context. Third,
+we perform inference on hypergraph data that is not within the reach of competing methods
+and present a novel application of delayed-acceptance MCMC methodology. Finally, we theoretically investigate the properties of the degree distribution of our model and, whilst this proves
+challenging, our discussion provides an outline which can be explored for other modelling choices.
+The rest of this paper is organised as follows. Section 2 provides the background for the
+hypergraph model presented in Section 3. Section 4 considers the degree distribution of our
+model and Section 5 describes a procedure for obtaining posterior samples. The simulation
+studies and real data examples are presented in Sections 6 and 7, respectively, and we conclude
+with a discussion in Section 8.
+
+2
+
+Background
+
+In this section we review the network modelling literature which forms the basis of our proposed
+hypergraph model. In Section 2.1 and 2.2, we discuss the latent space framework of Hoff et al.
+(2002) random geometric graphs, respectively. Then, in Section 2.3 we describe how a random
+geometric graph can be extended to model a restricted class of hypergraphs.
+
+3
+
+2.1
+
+Latent Space Network Modelling
+
+Latent space models were introduced for network data in Hoff et al. (2002). The key assumption
+of this framework is that the nodes of a network can be represented in a low-dimensional latent
+space, and that the probability of an edge forming between each pair of nodes can be modelled
+as a function of their corresponding latent coordinates.
+To describe this model for a N node network, we let Y = {yij }i,j=1,2,...,N denote the observed
+(N × N ) adjacency matrix, where yij represents the connection between nodes i and j. For
+binary interactions, we take yij = 1 if i and j share an edge and yij = 0 otherwise. We
+also let ui ∈ Rd denote the d-dimensional latent coordinate associated with the ith node, for
+i = {1, 2, . . . , N } = [N ]. The presence of an edge is then given by
+Yij ∼ Bernoulli(pij )
+pij = P (yij = 1|ui , uj , θ) =
+
+1
+,
+1 + exp{−f (ui , uj , θ)}
+
+(1)
+
+for i, j ∈ [N ], where θ represents additional model parameters and f controls how the latent
+coordinates affect the propensity for ties to form. It is typical to chose f to be monotonically
+decreasing in a measure of similarity between ui and uj . For example, the distance model
+introduced in Hoff et al. (2002) is obtained by choosing
+f (ui , uj , θ) = α − kui − uj k,
+
+(2)
+
+where k · k is the Euclidean distance, and θ = (α) represents the base-rate tendency for edges to
+form. The function f may also be adapted to incorporate covariate information so that nodes
+which share certain characteristics are more likely to be connected. The likelihood, conditional
+on U = {ui }N
+i=1 and θ, is given by
+Y
+1−y
+(3)
+L(U , θ; Y ) ∝
+P (yij = 1|ui , uj , θ)yij [1 − P (yij = 1|ui , uj , θ)] ij ,
+i<j
+
+Properties of this model are well understood and we refer to Rastelli et al. (2016) for details.
+
+2.2
+
+Random Geometric Graphs
+
+Random geometric graphs (RGGs) (Penrose, 2003) can be viewed as a special case of the latent
+space network model outlined in Section 2.1. To express the connection probabilities, we let ui =
+(ui1 , ui2 , . . . , uid ) ∈ Rd and associate each node with a ball of radius r that is centered on its latent
+
+qP
+
+d
+d
+d
+2
+coordinate, namely Br (ui ) = {u ∈ R | ku − ui k ≤ r} = u ∈ R
+j=1 (uj − uij ) ≤ r .
+The presence of an edge is then expressed deterministically as
+pij = P (yij = 1|ui , uj , θ) = 1 (Br (ui ) ∩ Br (uj ) 6= ∅) ,
+
+(4)
+
+where θ = r, so that nodes i and j share a tie only if their corresponding sets have a nonempty
+intersection (see the left and middle panel of Figure 2). Since this procedure is equivalent to
+connecting nodes i and j when kui − uj k ≤ 2r, we may also write
+pij = P (yij = 1|ui , uj , r) = 1 (kui − uj k ≤ 2r) .
+
+(5)
+
+Maintaining the notation from Section 2.1, we can now express the likelihood of observing Y
+conditional on U and r as
+Y
+L(U , r; Y ) ∝
+1(kui − uj k ≤ 2r)yij [1 − 1(kui − uj k ≤ 2r)]1−yij .
+(6)
+i<j
+
+4
+
+0.6
+
+0.6
+
+0.6
+
+1●
+0.4
+
+2●
+
+5●
+
+−0.4
+
+−0.2
+
+0.0
+
+0.2
+
+ui1
+
+6●
+
+3●
+7●
+
+5●
+
+0.0
+
+0.0
+−0.6
+
+4●
+2●
+
+5●
+
+7●
+
+0.0
+
+7●
+
+6●
+
+3●
+
+0.2
+
+6●
+
+3●
+
+ui2
+
+4●
+
+ui2
+
+2●
+
+0.2
+
+ui2
+
+4●
+0.2
+
+1●
+
+0.4
+
+0.4
+
+1●
+
+−0.6
+
+−0.4
+
+−0.2
+
+0.0
+
+0.2
+
+ui1
+
+−0.6
+
+−0.4
+
+−0.2
+
+0.0
+
+0.2
+
+ui1
+
+Figure 2: Example of a Čech complex. Left: Br (ui ) for {ui = (ui1 , ui2 )}7i=1 in R2 . Middle:
+the graph obtained by taking pairwise intersections. Right: the hypergraph obtained by taking
+intersections of arbitrary order. The shaded region indicates a order 3 hyperedge.
+Since a RGG is deterministic conditional on U and r, (6) is equal to 1 only when there is a
+perfect correspondence between the observed connections Y and the connections induced by the
+latent positions and radius, and is otherwise equal to 0.
+
+2.3
+
+Random Geometric Hypergraphs
+
+We can generalise the graph generating procedure from Section 2.2 to model hypergraphs by considering the full intersection pattern of convex sets, and we refer to these hypergraphs as random
+geometric hypergraphs (RGHs). To begin, we introduce the concept of a nerve (Edelsbrunner
+and Harer, 2010, Section 3.2) in the following definition.
+N
+Definition 2.1. (Nerve) Let
+of non-empty sets. The nerve
+
+ A = {Ai }i=1 represent a collection
+
+of A is given by N rv(A) =
+
+σ ⊆ {1, 2, . . . , N } ∩ Aj 6= ∅ .
+j∈σ
+
+Intuitively, the nerve represents the set of indices whose corresponding regions have a nonempty intersection. Note also that the sets {1}, {2}, . . . , {N } are included in N rv(A) and that
+|σ| ≤ N for σ ∈ N rv(A), where |σ| is the order, or dimension, of the set. Clearly, the nerve defines
+a hypergraph where σ ∈ N rv(A) represents a hyperedge. Note that for sets σ1 ∈ N rv(A) and
+σ2 ⊂ σ1 , it follows immediately that σ2 ∈ N rv(A). This property indicates that the hypergraph
+generated by a nerve is simplicial (Kahle, 2017).
+In Section 2.2, we considered the choice Ai = Br (ui ) for generating a RGG. The nerve for
+this choice of A is well studied and it is referred to as the Čech complex (Edelsbrunner and
+Harer, 2010, Section 3.2), as given in Definition 2.2.
+N
+Definition 2.2. (Čech Complex) For a set of coordinates
+ U = {ui }i=1 and a radius r, the Čech
+N
+complex Cr (U ) is given by Cr (U ) = N rv {Br (ui )}i=1 .
+
+We now introduce a subset of the Čech complex known as the k-skeleton which will be
+revisited in Section 3.2. Below, we present a precise definition along with an example.
+Definition 2.3. (k-skeleton of the Čech complex) Let Cr (U ) denote the Čech complex, as given
+(k)
+in Definition 2.2. The k-skeleton of Cr (U ) is given by Cr (U ) = {σ ∈ Cr (U )||σ| ≤ k}.
+Example 2.1. Figure 2 depicts an example of a Čech complex, where Cr (U ) = {{1}, {2}, {3}, {4},
+(1)
+{5}, {6}, {7}, {2, 4}, {2, 7}, {3, 5}, {3, 6}, {5, 6}, {3, 5, 6}}. The k-skeletons are given by Cr (U ) =
+5
+
+(2)
+
+(1)
+
+(3)
+
+{{1}, {2}, {3}, {4}, {5}, {6}, {7}}, Cr (U ) = Cr ∪{{2, 4}, {2, 7}, {3, 5}, {3, 6}, {5, 6}} and Cr (U )
+(2)
+= Cr (U ) ∪ {3, 5, 6}.
+
+3
+
+Latent space hypergraphs
+
+We now introduce a model for hypergraph data which builds upon the models discussed in the
+previous section. The motivation and notation for our approach are given in Section 3.1 and a
+preliminary model for non-simplicial hypergraphs is given in Section 3.2. Finally, we present our
+generative model and likelihood in Section 3.3 along with a more flexible modification in Section
+3.3.
+
+3.1
+
+Motivation and Notation
+
+Recall the motivating examples of coauthorship and image co-tagging (see Figure 1) where we
+observe arbitrary interaction patterns. For these examples, the model discussed in Section 2.3 is
+likely too restrictive. This motivates us to develop a model which builds upon the ideas presented
+in Section 2 and is appropriate for non-simplicial hypergraphs. Crucially, we aim to develop a
+model which has (i) a convenient and computationally-tractable likelihood with (ii) a simple to
+describe support for general hypergraph data.
+We consider hypergraphs on N nodes with arbitrary interaction patterns and let K denote the
+maximum hyperedge order, for 2 ≤ K ≤ N . We denote the space of hypergraphs on N and K as
+GN,K and write GN,K = (VN , EN,K ), where VN = {1, 2, . . . , N } and EN,K denote the node labels
+and the set of possible hyperedges up to order K on N nodes, respectively. Additionally, we let
+EN,k represent the possible hyperedges of exactly order k on N nodes, so that EN,K = ∪K
+k=2 EN,k ,
+and let ek ∈ EN,k denote an order k interaction, where |ek | = k and ek contains no repeated
+elements.
+
+3.2
+
+Combining k-skeletons
+
+To extend the model in Section 2.3 to express non-simplicial hypergraphs we allow the radii to
+differ for each hyperedge order. More specifically, we generate a hypergraph by isolating the
+order k hyperedges from the complex Crk (U ) and combining these for k = 2, 3, . . . , K, where
+rk 6= rk0 for k 6= k 0 . As an example, consider radii r2 and r3 and their associated Čech complexes
+Cr2 (U ) and Cr3 (U ). Here we take the order 2 hyperedges in Cr2 (U ) and the order 3 hyperedges in
+Cr3 (U ) to obtain a non-simplicial interaction pattern, as demonstrated in Figure 3. We refer to a
+hypergraph constructed in this way as a non-simplicial random geometric hypergraph (nsRGH)
+and a formal description of this is given in Definition 3.1.
+Definition 3.1. (nsRGH) Take r = (r2 , r3 , . . . , rK ) such that rk > rk−1 > 0 for k = 3, 4, . . . , K.
+(k)
+We define a nsRGH on N nodes as the hypergraph with hyperedges given by ∪K
+k=2 Drk (U ), where
+(k)
+(k)
+(k−1)
+Drk (U ) = Crk (U ) \ Crk (U ) denotes the hyperedges of exactly order k in the Čech complex
+(k)
+with radius rk and Crk (U ) is as in Definition 2.3. We denote this construction as g(U , r)
+throughout.
+(2)
+
+Example 3.1. For the nsRGH shown in the right panel of Figure 3 we have g(U , r) = Dr2 (U )∪
+(3)
+(2)
+(3)
+Dr3 (U ), where Dr2 (U ) = {{2, 4}, {2, 7}, {3, 5}, {5, 6}} and Dr3 (U ) = {3, 5, 6}.
+In Definition 3.1, constraints are imposed on the radii r = (r2 , r3 , . . . , rK ) to ensure that the
+generated hypergraphs are non-simplicial. To see this note that, if r3 < r2 and the hyperedge
+6
+
+0.6
+
+0.6
+
+0.6
+
+0.4
+
+2●
+
+5●
+
+−0.4
+
+−0.2
+
+0.0
+
+0.2
+
+6●
+
+3●
+5●
+
+0.0
+
+7●
+
+0.0
+−0.6
+
+4●
+2●
+
+5●
+
+7●
+
+0.0
+
+7●
+
+6●
+
+3●
+
+0.2
+
+6●
+
+3●
+
+ui2
+
+4●
+
+ui2
+
+2●
+
+0.2
+
+ui2
+
+4●
+0.2
+
+1●
+
+0.4
+
+1●
+
+0.4
+
+1●
+
+−0.6
+
+ui1
+
+−0.4
+
+−0.2
+
+0.0
+
+ui1
+
+0.2
+
+−0.6
+
+−0.4
+
+−0.2
+
+0.0
+
+0.2
+
+ui1
+
+Figure 3: Example of a nsRGH (see Definition 3.1) with U = {ui }7i=1 = {(ui1 , ui2 )}7i=1 . Left:
+(k)
+Cr2 (U ). Middle: Cr3 (U ). Right: ∪3k=2 Drk (U ).
+{i, j, k} is present in the hypergraph, then it follows that the hyperedges {i, j}, {i, k} and {j, k}
+must also be in the hypergraph.
+
+3.3
+
+Generative Model and Likelihood
+
+Since the procedure of generating a nsRGH g(U , r) (see Definition 3.1) is deterministic conditional on U and r, there are two impediments to using this model for real data. Firstly,
+estimation via likelihood based methods is challenging since the probability of observing a hypergraph hN,k ∈ GN,K is binary and equal to one only if there is a perfect correspondence
+between hyperedges in g(U , r) and hN,K . Therefore, the likelihood cannot be used to guide an
+estimation procedure to probable values of U since a candidate estimate can only be evaluated
+as precisely correct or incorrect. Secondly, it is not straightforward to characterise the space of
+hypergraphs that can be expressed as a nsRGH and so we do not know a priori whether a latent
+space representation can be found.
+To address these issues, we introduce a modification of a nsRGH whereby the state of the
+hyperedges in g(U , r) are perturbed according to a small amount of noise. More specifically, we
+modify the indicator denoting presence or absence for each hyperedge with probability ϕk ∈ [0, 1]
+(g)
+(g ∗ )
+as follows. Let g ∗ (U , r, ϕ) denote the modified hypergraph, and let yek ∈ {0, 1} and yek ∈
+{0, 1} denote the state of hyperedge ek in g(U , r) and g ∗ (U , r, ϕ), respectively, where a state
+equal to one indicates presence. Then, we take
+
+(g)
+
+if sk = 1 and yek = 1
+0,
+∗
+(g)
+ye(gk ) = 1,
+(7)
+if sk = 1 and yek = 0
+
+ (g)
+yek , if sk = 0
+(g)
+
+where Sk ∼ Bernoulli(ϕk ), so that yek is modified from either present to absent or absent to
+present with probability ϕk . The noise term ϕk controls the amount of modification to the
+hyperedges of order k and setting ϕk close to 0 obtains a hypergraph that is similar to a nsRGH.
+Crucially, this modification results in a model that has the desired properties highlighted in
+Section 3.1 since we extend the support of nsRGHs to the full space of hypergraphs and the
+likelihood is no longer binary for ϕk ∈
+/ {0, 1}.
+To fully specify a generative model, we assign a probability distribution on the latent cooriid
+dinates U . We let ui ∼ N (µ, Σ), for i ∈ [N ] to reflect the intuition that nodes placed more
+centrally in the latent representation are likely to have high degree and neighbours with high
+7
+
+∗
+Algorithm 1 Sample a hypergraph gN,K
+given N, K, r, ϕ, µ and Σ.
+iid
+
+Sample U = {ui }N
+i=1 such that ui ∼ N (µ, Σ), for i = 1, 2, . . . , N .
+For k = 2, 3, . . . , K,
+(g)
+a) Given U and rk , check which ek = {i1 , i2 , . . . , ik } ∈ EN,k satisfy yek = 1.
+(g)
+To determine if yek = 1, check that ∩kl=1 Brk (uil ) 6= ∅.
+b) For all ek ∈ 
+EN,k , sample
+ Sk ∼ Bernoulli(ϕk ).
+(g ∗ )
+
+Let yek
+
+(g)
+
+= yek + sk
+
+mod 2
+
+degree. A hypergraph can now be generated by the procedure given in Algorithm 1, and details
+of efficient implementation of this are given in Appendix B and E.1.
+We express the likelihood of an observed hypergraph hN,K ∈ GN,K , conditional on U , r and
+ϕ, by considering the discrepancy between the hyperedge configurations in hN,K and gN,K (U , r).
+For k = 2, 3, . . . , K, let
+X
+dk (gN,K (U , r), hN,K ) =
+|ye(g)
+− ye(h)
+|
+(8)
+k
+k
+ek ∈EN,k
+(h)
+
+denote the discrepancy between the order k hyperedges in gN,K (U , r) and hN,K , where yek ∈
+{0, 1} indicates the state of ek in hN,K . Intuitively, the distance (8) corresponds to the number of
+hyperedges whose state differs between hN,K and gN,K (U , r). This is equivalent to the Hamming
+distance and is related to both the l1 norm and the exclusive or (XOR) operator. Evaluating
+
+PK
+this distance does not require the k=2 N
+k computations suggested by (8), and we can instead
+evaluate the discrepancy by only considering hyperedges that are present in gN,K (U , r) and
+hN,K . In practice, this is likely to be far less than the number of possible hyperedges and details
+of this are discussed in Appendix E.2.
+Given this notion of hypergraph distance the likelihood of observing hN,K , conditional on
+U , r and ϕ, can be written as
+L(U , r, ϕ; hN,K ) ∝
+
+K
+Y
+
+d (gN,K (U ,r),hN,K )
+
+ϕkk
+
+N
+(1 − ϕk )( k )−dk (gN,K (U ,r),hN,K ) .
+
+(9)
+
+k=2
+
+We obtain (9) by considering which hyperedges in gN,K (U , r) must have their state modified
+to match the hyperedges in hN,K , and which hyperedges are the same as in hN,K . For order k
+hyperedges which differ, the probability of switching the hyperedge state is given by ϕk . Since our
+likelihood is of the same form as Lunagómez et al. (2020, proof of Proposition 3.1), it follows that
+hypergraphs with a greater number of hyperedge modification are less likely for 0 < ϕk < 1/2
+and so (9) behaves in an intuitive way.
+The model specification is complete with the following priors
+µ ∼ N (mµ , Σµ )
+
+Σµ ∼ W −1 (Φ, ν),
+
+rk ∼ exp(λk ), and ϕk ∼ Beta(ak , bk ),
+
+(10)
+
+for k = 2, 3, . . . , K, where W −1 (·, ·) denotes an Inverse-Wishart.
+
+3.4
+
+Can we improve model flexibility?
+
+In a nsRGH, the constraint rk > rk−1 , for k = 3, . . . , K, ensures that the interactions are
+non-simplicial. However, note that this implies rk will impact the higher-order hyperedges.
+8
+
+∗
+Algorithm 2 Sample a hypergraph gN,K
+given N, K, r, ψ 0 , ψ 1 , µ and Σ.
+iid
+
+Sample U = {ui }N
+i=1 such that ui ∼ N (µ, Σ), for i = 1, 2, . . . , N .
+For k = 2, 3, . . . , K,
+a) Given U and rk , check which ek = {i1 , ı2 , . . . , ik } ∈ EN,k satisfy yek = 1.
+To determine if yek = 1, that ∩kl=1 Brk (uil ) 6= ∅.
+b) For all ek ∈ EN,k
+(g)
+(g ∗ )
+If yek = 1, set yek = 0 with probability ψk1 .
+(g)
+(g ∗ )
+If yek = 0, set yek = 1 with probability ψk0 .
+
+To improve model flexibility, we can introduce an additional modification parameter for each
+hyperedge order. In Algorithm 1 the noise ϕk is applied independently across all hyperedges of
+order k and, alternatively, we can modify each hyperedge depending on its state in gN,K (U , r).
+0
+For k = 2, 3, . . . , K, let ψ 0 = (ψ20 , ψ30 , . . . , ψK
+) ∈ [0, 1] denote the probability of modifying the
+1
+state of a hyperedge in gN,K (U , r) from absent to present, and let ψ 1 = (ψ21 , ψ31 , . . . , ψK
+) ∈ [0, 1]
+denote the probability of modifying the state of a hyperedge in gN,K (U , r) from present to
+absent. This generative model is summarised in Algorithm
+ 2, and as commented in Section
+PK
+3.3, we can implement this without the suggested k=2 N
+k computations. Further details on
+efficient implementation can be found in the relevant sections of the supplement, as highlighted
+in Section 3.3.
+As in Section 3.3, the likelihood of observing hN,K is based on a distance metric,
+(ab)
+
+dk
+
+(gN,K (U , r), hN,K ) = #{ek ∈ EN,k |ye(g)
+= a ∩ ye(h)
+= b},
+k
+k
+
+(11)
+
+which records the number of hyperedges that have state a ∈ {0, 1} in gN,K (U , r) and state
+(01)
+b ∈ {0, 1} in hN,K . For example, dk (gN,K (U , r), hN,K ) represents the number of hyperedges
+absent in gN,K (U , r) and present in hN,K . Efficient evaluation of (11) is discussed in Appendix
+(E.2) and the likelihood conditional on U , r, ψ 1 and ψ 0 is given by
+1
+
+0
+
+
+
+L U , r, ψ , ψ ; hN,K ∝
+
+K 
+Y
+
+ψk1
+
+d(10)
+(gN,K (U ,r),hN,K )
+k
+
+1 − ψk1
+
+d(11)
+(gN,K (U ,r),hN,K )
+k
+
+k=2
+(01)
+
+×
+
+d
+ψk0 k
+
+(gN,K (U ,r),hN,K )
+
+(00)
+
+d
+1 − ψk0 k
+
+(gN,K (U ,r),hN,K )
+
+
+.
+
+(12)
+
+We obtain (12) in a similar way to (9), where we distinguish between hyperedges that are
+present and absent in the induced hypergraph. Note that (12) is equivalent to (9) when ψk1 =
+ψk0 = ϕk , for k = 2, 3, . . . , K.
+The model specification is complete with the following prior distributions
+
+
+µ ∼ N (mµ , Σµ ), Σµ ∼ W −1 (Φ, ν), rk ∼ exp(λk ), ψk0 ∼ Beta a0k , b0k , ψk1 ∼ Beta a1k , b1k ,
+(13)
+for k = 2, 3, . . . , K, where W −1 (·, ·) denotes an Inverse-Wishart.
+
+3.5
+
+Identifiability
+
+We now consider identifiability for the model presented in Section 3.3 and note that analogous
+observations can be made for the modification given in Section 3.4. To begin, we note that the
+9
+
+joint distribution of the hypergraph g ∗ (U , r, ϕ) and its associated nsRGH (see Definition 3.1)
+g(U , r) can be decomposed as follows.
+p(g ∗ (U , r, ϕ), g(U , r)|µ, Σ, ϕ, r) = p (g ∗ (U , r, ϕ)|g(U , r), ϕ) p (g(U , r)|µ, Σ, r)
+
+(14)
+
+The conditional distribution p(g(U , r)|µ, Σ, r) in (14) contains the hyperedges obtained via
+the geometric component of the model. These hyperedges are determined through their relative
+latent positions and therefore will be unchanged given distance-preserving transformations of U
+or, alternatively, scaling of U and r by the same factor. To make this clear, consider how the
+interaction patterns in Figure 2 vary according to translations, reflections, rotations of U or by
+jointly scaling U and r. We remove these sources of non-identifiability by defining U on the
+Bookstein space of coordinates (see Bookstein (1986) and (Dryden and Mardia, 1998, Section
+2.3.3)). Intuitively, Bookstein coordinates define a translation, rotation and re-scaling of the
+points U with respect to a set of anchor points which remain fixed throughout the posterior
+sampling procedure outlined in Section 5. Furthermore, by restricting the latent coordinates in
+this way, we also address the non-identifiability associated with rescaling r. Details of this are
+given Appendix A.
+Our approach to removing non-identifiability has not been previously considered in latent
+space network modelling literature, where it is typical to use Procrustes analysis (Dryden and
+Mardia, 1998, Section 5) in which an additional post-processing step is included to remove the
+effect of distance preserving transformations of U . However, due to the additional source of
+non-identifiability associated with scaling U and r, we note that this approach is not sufficient
+for our setting.
+Finally, (14) shows that a hyperedge in our model can either be attributed to the geometric or
+noise component. Therefore, to maintain the properties imposed on the hypergraph by g(U , r),
+we wish to keep the parameters ϕ small. In practice, when there are a small number of observed
+hyperedges, it will become increasingly difficult to distinguish between these competing sources.
+This implies an additional source of non-identifiability which we address by ensuring the noise
+terms ϕ are sufficiently small.
+
+4
+
+Theoretical Results
+
+We now study the behaviour of the node degree in the hypergraph model detailed in Algorithm
+1. Since the nodes in our hypergraph model are exchangeable, it is sufficient to study the
+degree properties of the ith node and we comment here that it is straightforward to extend the
+results in this section to the model detailed in Algorithm 2. To begin, we make explicit the
+following properties of our hypergraph model: (P1) A hypergraph generated from our model is
+a modification of a nsRGH (see Definition 3.1), and (P2) Conditional on U and r, hyperedges
+of each order occur independently in our model.
+To obtain our results, we also assume: (A1) The number of nodes N and maximum hyperedge
+order K are fixed, and (A2) The covariance of the latent coordinates Σ is diagonal, where Σll = σll2
+for l = 1, 2, . . . , d. Note that (A2) is not restrictive since we can take a distance-preserving
+transformation of a Gaussian point cloud in Rd to map the covariance matrix onto a diagonal
+matrix.
+Following Section 3, we denote a hypergraph obtained by modifying the nsRGH g(U , r) as
+(g)
+(g ∗ )
+∗
+g (U , r, ϕ), and we let yek and yek indicate the presence or absence of the hyperedge ek in
+g(U , r) and g ∗ (U , r, ϕ), respectively. The degree of node i in a hypergraph is given by the
+number of hyperedges which contain i and, for node i in g(U , r), we denote the order k degree
+P
+PK
+(g)
+g
+as Degg(i,k) =
+{ek ∈EN,k |i∈ek } yek and the full degree as Deg(i) =
+k=2 Deg(i,k) . Analogous
+10
+
+expressions for g ∗ (U , r, ϕ) are obtained by replacing g with g ∗ . To organise our results, we
+separate the discussion into hyperedges with order k = 2 and k ≥ 3. For each case, we consider
+the probability of connections forming in our hypergraph model and how this translates into
+properties of the node degree. Proofs can be found in Appendix F.
+
+4.1
+
+Degree properties for k = 2
+
+We begin by restating a result from Rastelli et al. (2016) which allows us to express the degree
+distribution and average degree for order k = 2 hyperedges in our model. Throughout, we express
+hyperedges of order 2 which contain node i as {i, j}.
+Theorem 4.1 (Reproduced from (Rastelli et al., 2016, Theorem 1)). Let p{i,j} (ui |r2 , ϕ2 , µ, Σ)
+denote the probability of node i with latent position ui belonging to an order 2 hyperedge in the
+hypergraph model detailed in Section 3.3. Conditional on r2 , ϕ2 , µ and Σ, the degree distribution
+of order 2 hyperedges for the ith node for our hypergraph model is given by
+
+
+
+ Z
+N −1
+(g ∗ )
+p Degi,2 = l|r2 , ϕ2 , µ, Σ = p(ui |µ, Σ)
+p{i,j} (ui |r2 , ϕ2 , µ, Σ)l
+l
+× (1 − p{i,j} (ui |r2 , ϕ2 , µ, Σ))N −1−l dui ,
+
+(15)
+
+and the average degree is given by
+∗
+
+(g )
+d¯2 (rw , ϕ2 , µ, Σ) = (N − 1)
+
+Z
+p(ui |µ, Σ)p{i,j} (ui |r2 , ϕ2 , µ, Σ) dui .
+
+(16)
+
+Proof. See Appendix F.1.
+In order to apply this result, we must derive an expression for p{i,j} (ui |r2 , ϕ2 , µ, Σ). This is
+given in the following proposition.
+Proposition 4.1 (Probability of an order k = 2 hyperedge). Let e2 = {i, j} denote an order
+k = 2 hyperedge. The probability of e2 occurring in g ∗ , given that node i has latent position ui ,
+can be expressed as
+ ∗
+
+
+
+(g )
+(g)
+p{i,j} yij = 1|ui , r2 , ϕ2 , µ, Σ = p y{i,j} = 1|ui , r2 , µ, Σ (1 − ϕ2 )
+
+
+
+(g)
++ 1 − p y{i,j} = 1|ui , r2 , µ, Σ ϕ2 , (17)
+
+
+(g)
+where p y{i,j} = 1|ui , r2 , , µ, Σ denotes the probability of e2 = {i, j} being present in g(U , r)
+when node i is positioned at ui . We then have
+
+
+(g)
+p y{i,j} = 1|ui , r2 , µ, Σ = p((Uj∗ )T Uj∗ ≤ 4r22 ),
+(18)
+where Uj∗ = Uj − ui ∼ N (µ − ui , Σ). Then
+(Uj∗ )T Uj∗ ∼
+
+d
+X
+
+σl2 χ21,((µ−ui )l /σl )2 .
+
+(19)
+
+l=1
+
+where (µ − ui )l is the lth component of (µ − ui ), for l = 1, 2, . . . , d and Σ = diag(σ12 , σ22 , . . . , σd2 ).
+Proof. See Appendix F.1.
+11
+
+In combination with Theorem 4.1, Proposition 4.1 allows us to evaluate properties of the
+node degree of order k = 2 hyperedges. Note however that the integrals (15) and (16) are
+intractable so we require numerical evaluation to explore these quantities. Furthermore, determining probabilities for the distribution (19) is straightforward when the variances constant but
+requires numerical methods for general diagonal Σ where, in the latter case, we rely on the R
+packages CompQuadForm (Duchesne and de Micheaux, 2010). The expression for the connection
+probabilities in Proposition 4.1 is validated for an example in Figure 4.
+
+Degree properties for k ≥ 3
+
+4.2
+
+We now present some results for the order k degree distribution. First, we note that the expression
+for the degree distribution of order k = 2 hyperedges given in Theorem 4.1 arises since hyperedges
+of the form {i, j} occur independently given ui . This is no longer true for higher-order hyperedges
+since, for example, if k = 3 it is clear that hyperedges {i, j, l} and {i, j, m} are not independent
+given i. Deriving an exact expression for the order k degree distribution is therefore challenging,
+and we consider an approximation of this in the following proposition where we denote an order
+k hyperedge containing node i as ek,i .
+ ∗
+(g )
+Proposition 4.2 (Approximate order k degree distribution). Let pek,i yek,i = 1|ui , rk , ϕk ,
+µ, Σ) denote the probability of node i with latent position ui belonging to an order k hyperedge, denoted as ek,i , in the hypergraph model detailed in Section 3.3. Conditional on rk , ϕk , µ
+and Σ, the degree distribution of order k ≥ 3 hyperedges for the ith node for our hypergraph model
+is approximately
+
+ Z
+(g ∗ )
+p Degi,k = l|r2 , ϕ2 , µ, Σ ≈ p(ui |µ, Σ)
+
+×
+
+ (g∗ )
+N −1
+k−1 p(yek,i = 1|ui , rk , ϕk , µ, Σ)
+
+l
+
+
+
+ (g∗ )
+−1
+exp − N
+p(y
+=
+1|u
+,
+r
+,
+ϕ
+,
+µ,
+Σ)
+ek,i
+i k
+k
+k−1
+l!
+
+dui
+
+(20)
+
+Proof. See Appendix F.2.
+This proposition relies on a Poisson approximation to the sum of dependent Bernoulli trials.
+Bounds for the quality of this approximation have been studied (for example, see Teerapabolarn
+(2014)) and it is well understood that this approximation will degrade as either the number of
+possible hyperedges, as controlled by N and k, or the connection probability pek,i (ui |rk , ϕk , µ, Σ)
+grows, or both.
+As in the previous section, we require an expression for pek,i (ui |rk , ϕk , µ, Σ) to explore this
+distribution. Similarly to Proposition 4.1, an order k hyperedge can be expressed either by the
+geometric or noise component of our model, where the probability of occurrence in g(U , r) is the
+more challenging to determine. Recall that this quantity is given by the probability that the balls
+of radius rk corresponding to the nodes in ek,i have a non empty intersection. More specifically,
+the hyperedge ek,i = {i, i2 , i3 , . . . , ik } is present in g(U , r) if ∩j∈ek,i Brk (uj ) 6= ∅. This condition
+is equivalent to the coordinates {uj }j∈ek,i lying within a ball of radius rk (see (Edelsbrunner
+and Harer, 2010, Section 3.2) and Appendix E.1). However, since the latent coordinates are
+assumed to follow a Normal distribution, evaluating this probability directly requires evaluation
+of an intractable integral (for example, see Gilliland (1962)). To address this, we consider an
+approximation of this quantity in which the region √
+of integration is approximated by a square
+of side length sk , denoted as Ssk . We choose sk = πrk so that it has equal area to a disk of
+radius rk . This choice greatly simplifies the region of integration by allowing each dimension to
+be considered independently and, using this, we obtain the expression in Lemma 4.1.
+12
+
+1.0
+0.6
+
+probability
+
+0.8
+
+k=2 theory
+k=2 MC
+k= 3 theory
+k= 3 MC
+k= 4 theory
+k= 4 MC
+
+0.0
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+k=2 theory
+k=2 MC
+k= 3 theory
+k= 3 MC
+k= 4 theory
+k= 4 MC
+
+0.2
+
+probability
+
+ui=(2,2)
+
+0.4
+
+1.0
+
+ui=(0,0)
+
+0.0
+
+0.5
+
+1.0
+
+1.5
+
+2.0
+
+0.0
+
+r
+
+0.5
+
+1.0
+
+1.5
+
+2.0
+
+r
+
+(g)
+
+Figure 4: Comparison of theoretical (solid) and Monte Carlo (dashed) estimates of p(yek,i =
+1|ui , rk , µ, Σ) for varying rk . We take Σ = diag(1, 1), µ = (0, 0) and consider connection probabilities for k = 2, 3, 4. In the left plot ui = µ and in the right plot ui = (1, 2). The same study
+with Σ = diag(1, 2) is provided in Appendix F.3.
+Lemma 4.1 (Probability of an order k ≥ 3 hyperedges). We can express the probability of an
+order k hyperedge containing node i, denoted as ek,i , being present in g ∗ conditional on the latent
+coordinate ui as
+ ∗
+
+
+
+p ye(gk,i) = 1|ui , rk , ϕk , µ, Σ = p ye(g)
+=
+1|u
+,
+r
+,
+µ,
+Σ
+(1 − ϕk )
+i
+k
+k,i
+
+
+
++ 1 − p ye(g)
+= 1|ui , rk , µ, Σ ϕk ,
+(21)
+k,i
+
+
+(g)
+where p yek,i = 1|ui , r2 , µ, Σ is the probability of the order k hyperedge ek,i = {i, i2 , i3 , . . . , ik }
+being present in g(U , r) when node i is positioned at ui .
+The probability of ek,i occurring in g(U , r) with Uj ∼ N (µ, Σ), conditional on ui , can then
+be approximated as follows.
+
+
+p ye(g)
+=
+1|u
+,
+r
+,
+µ,
+Σ
+≈
+i
+k
+k,i
+Z
+d 
+Y
+k−2
+
+√
+(k − 1) f (u|µl , σl ) Fm (u + πrk |µl , σl ) − Fm (u|µl , σl )
+l=1
+
+×1(ui ∈ (u, u +
+
+√
+
+
+k−1 i
+√
+πrk )) du + Fm (ui + πrk |µl , σl ) − Fm (ui |µl , σl )
+,
+
+(22)
+
+where f (·|µl , σl ) and F (·|µl , σl ) denote the pdf and cdf of the random variable with distribution
+N (µl , σl2 ), µl denotes the lth element of µ and Σ = diag(σ12 , σ22 , . . . , σd2 ).
+Proof. See Appendix F.2.
+These results allow us to examine the behaviour of the degree distribution. We examine the
+(g)
+quality of the p(yek,i = 1|ui , rk , µ, Σ) approximation and the Poisson approximation in Figures 4
+and 5, respectively. We note that there is an interplay between the hyperedges which arise in our
+model from the latent coordinate and those which arise as random noise. Whilst we may obtain
+similar probabilities of connection through parameter combinations which result in the majority
+of hyperedges occurring due to either the geometric or random component, it is important to
+observe that the resulting properties of the hyperedges will differ considerably. Beyond the degree
+distribution, differences may also appear, for example, within motif counts and measures of
+transitivity. The above calculations suggest that examining such properties theoretically is likely
+13
+
+0.6
+0.4
+
+probability
+
+0.8
+
+r= 0.1 theory
+r= 0.1 MC
+r= 0.5 theory
+r= 0.5 MC
+r= 1 theory
+r= 1 MC
+
+0.0
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+r= 0.1 theory
+r= 0.1 MC
+r= 0.5 theory
+r= 0.5 MC
+r= 1 theory
+r= 1 MC
+
+0.2
+
+probability
+
+1.0
+
+ui=(2,2)
+
+1.0
+
+ui=(0,0)
+
+0
+
+5
+
+10
+
+15
+
+20
+
+25
+
+30
+
+35
+
+0
+
+degree
+
+5
+
+10
+
+15
+
+20
+
+25
+
+30
+
+35
+
+degree
+
+Figure 5: Comparison between empirical (dashed line) and Poisson approximation (points) of
+the order k = 3 degree distribution conditional on the latent coordinate ui . We take N = 10, µ =
+(0, 0), Σ = diag(1, 1) and evaluate the distribution for r3 ∈ (0.1, 0.4, 1.0). The left plot shows
+ui = µ and the right plot shows ui = (1, 2). The equivalent Figures with Σ = diag(1, 2) and
+N = 20 are given in Appendix F.3.
+to be challenging and, whilst techniques such as those employed for studying random simplicial
+complexes may be used here (for example see Kahle (2017); Bobrowski and Krioukov (2021)),
+our choice of underlying distribution on the latent coordinates may limit their applicability.
+
+5
+
+Posterior Sampling
+
+We rely on Markov chain Monte Carlo (MCMC) (Gamerman and Lopes, 2006) to obtain posterior
+samples for the models specified in Sections 3.3 and 3.4. Here we provide a high-level description
+of our MCMC scheme for the model detailed in Algorithm 2 and note that this scheme can easily
+be modified for the model detailed in Algorithm 1. We refer the reader to the Appendix for
+further details.
+We use a Metropolis-Hastings-within-Gibbs MCMC scheme (Gamerman and Lopes, 2006,
+Section 6.4.2) to sample from our posterior. The latent coordinates U and radii r are updated
+with Metropolis-Hastings (MH) steps and the remaining parameters are updated via Gibbs steps.
+As is typically the case, evaluation of the likelihood (12) presents a computational bottleneck due
+to the calculations involved in determining the hypergraph gN,K (U , r). We rely on the efficient
+implementation available from the GUDHI library (The GUDHI Project, 2021) to evaluate the
+Čech complex and find that the cost of calculating the order k hyperedges in gN,K (U , r) grows
+with both N and k. This suggests that our target is a natural candidate for delayed-acceptance
+(DA) (see Banterle et al. (2019)) in which terms of the likelihood are sequentially included in order
+of increasing computational cost, allowing for a faster and computationally cheaper rejection of
+poor proposals.
+To specify a random-walk MH update for the latent coordinates U , first recall that we define
+U on the Bookstein space of coordinates (Section 3.5) so that a set of anchor points remain fixed
+throughout estimation. For ui ∈ Rd , let the d anchor points be denoted by {uB1 , uB2 , . . . , uBd }.
+Then, for i ∈ {1, 2, . . . , N }\{B1 , B2 , . . . , Bd } we propose U ∗ with ith entry u∗i = ui + u where
+u ∼ N (0, σu Id ) and all other entries u∗i = ui . This proposal is then accepted as a sample from
+p(U |µ, Σ, r, ψ 0 , ψ 1 , hN,K ) with probability
+
+
+L(U ∗ , r, ψ 1 , ψ 0 ; hN,K )p(u∗i |µ, Σ)
+.
+(23)
+min 1,
+L(U , r, ψ 1 , ψ 0 ; hN,K )p(ui |µ, Σ)
+14
+
+Algorithm 3 MCMC scheme to obtain posterior samples for the model in Section 3.4.
+Input: observations hN,K and N, K, jmax ∈ N.
+Initialisation
+Determine initialisation U (0) , r (0) , ψ 0(0) , ψ 1(0) , Σ(0) and µ(0) and specify Bookstein
+anchor coordinates {B1 , B2 , . . . , Bd } according to Algorithm 6 (see Appendix D).
+For j in 1, 2, . . . , jmax
+Gibbs update steps for ψ (0) , ψ (0) , µ and Σ
+1) For k = 2, 3, . . . , K
+
+0(i)
+Sample ψk from p ψk0 |U (i) , r (i) , hN,K , a0k , b0k (see Appendix C.3).
+
+1(i)
+Sample ψk from p ψk1 |U (i) , r (i) , hN,K , a1k , b1k (see Appendix C.4).
+2) Sample µ(j) from p(µ|U (i−1) , Σ(i−1) , mµ , Σµ ) (see Appendix C.1).
+3) Sample Σ(j) from p(Σ|U (i−1) , µ(i) , Φ, ν) (see Appendix C.2).
+Delayed-acceptance update steps for U
+4) For i = {1, 2, . . . , N }\{B1 , B2 , . . . , Bd }
+Propose u∗i = ui + ui , where ui ∼ N (0, σui Id )
+For l ∈ {2, 3, . . . , K}
+n Q
+o
+l
+Calculate ARl = min 1, k=2 ρk (U , U ∗ ) according to (25)
+(j)
+
+Continue with probability ARl , otherwise break and set uj = uj
+(j)
+
+(j)
+
+If l = K, set uj = u∗j with probability ARK , otherwise set uj = uj
+Random-walk update step for r
+5) For k = 2, 3, . . . , K
+Propose rk ∗ = rk + rk and rk ∼ N (0, σrk )
+With probability (26) set rk (j) = rk , otherwise set rk (j) = rk
+Note that the term associated with the proposal is symmetric and so does not appear in (23).
+Let hN,k denote the observed hyperedges of order k ∈ {2, 3, . . . , K}, then we can equivalently
+express (23) as
+(
+)
+K
+p(hN,2 |U ∗ , r2 , ψ21 , ψ20 )p(u∗i |µ, Σ) Y p(hN,k |U ∗ , rk , ψk1 , ψk0 )
+min 1,
+×
+(24)
+p(hN,2 |U , r2 , ψ21 , ψ20 )p(ui |µ, Σ)
+p(hN,k |U , rk , ψk1 , ψk0 )
+k=3
+(
+)
+K
+Y
+∗
+∗
+= min 1, ρ2 (U , U )
+ρk (U , U )
+(25)
+k=3
+
+where p(hN,k |U , rk , ψk1 , ψk0 ) denotes the contribution of the order k terms in (12).
+
+Following
+Banterle et al. (2019), we can then implement DA in which we first accept according to the
+order k = 2 terms, ρ2 (U , U ∗ ), and for k = 3, 4, . . . , K sequentially include the terms ρk (U , U ∗ ).
+We detail this in Algorithm 3 and note that a proposal can only be accepted according to the
+full likelihood. Therefore asymptotic exactness is unaffected, but poor proposals can be quickly
+rejected according to the terms involving lower-order hyperedges.
+The k th radii is updated according to a standard random-walk MH step, where the proposal
+∗
+rk = rk + r with r ∼ N (0, σr ), is accepted with probability
+
+
+p(hN,k |U , rk∗ , ϕk )p(rk∗ |λk )
+.
+(26)
+min 1,
+p(hN,k |U , rk , ϕk )p(rk |λk )
+The remaining parameters can be sampled directly from their full conditionals and an outline of our MCMC scheme for jmax iterations is presented in Algorithm 3. Further details for
+15
+
+Model
+Stasi et al. (2014)
+
+Ng and Murphy (2021)
+
+Latent Space Hypergraph
+
+Case
+1
+2
+1
+2
+3
+4
+1
+2
+3
+4
+5
+
+Description
+All nodes equally likely to form connections
+Some nodes more likely to form connections
+Hyperedges in a single cluster
+Distinct topic clusters only
+Distinct size clusters only
+Fuzzy topic clusters
+Strongly correlated Σ
+No correlation in Σ
+Dense in e2 , sparse in e3 , e4
+Sparse e2 , e4 , dense in e3
+Increase latent dimension from d = 2 to d = 3
+
+Table 1: Summary of cases for each hypergraph model considered in the model depth comparison
+study. The case numbers correspond to the labels in Figure 7.
+implementation of our scheme, including conditional distributions, initialisation and efficient
+evaluation of (12), can be found in the supplement. Finally, we comment that Algorithm 3 outlines a basic random walk and our implementation instead uses adaptive updates for U and r as
+detailed in Vihola (2012) and implemented in the R library ramcmc (see Helske (2021)). In this
+context, it is the distributions of ui and rk that are adapted to reflect the optimal acceptance
+rates for a random-walk MCMC scheme.
+
+6
+
+Simulations
+
+In this section we describe three simulation studies. We begin in Section 6.1 with an investigation
+of the flexibility of our modelling approach in comparison with two other hypergraph models
+from the literature. Then, in Section 6.2, we examine efficacy of our estimation procedure
+via the predictive degree distribution and explore the scalability of our approach for simulated
+hypergraphs in Section 6.3. An additional simulation study is presented in Appendix K where
+we consider the robustness of our model under misspecification.
+
+6.1
+
+Model depth comparisons
+
+Here we explore the range of hypergraphs that can be expressed via our model and provide a
+comparison with two competing models from the literature. To ensure our comparison is fair,
+we specify several cases which are designed to highlight important aspects of each model. For
+each case, we sample hypergraphs from the generative models and compare summary statistics
+which characterise certain properties of the simulated data.
+We will focus on the hypergraph model described in Algorithm 2 in addition to the uniform
+hypergraph model of Stasi et al. (2014) and the extended latent class analysis hypergraph model
+of Ng and Murphy (2021) (details of these models are given in Appendix G). The uniform
+hypergraph model allows control over the degree distribution via node-specific parameters and
+the extended latent class analysis hypergraph model is designed to express hyperedges which
+exhibit a clustering structure according to topic and size. In contrast, our model utilises a latent
+geometry to model the connections and so we expect transitive connections in which “friends
+of friends are likely to be friends”. Furthermore, our model also encourages a higher-order
+‘transitivity’ since, for example, the presence of hyperedges {i, j}, {i, k} and {j, k} suggests that
+16
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+(a1) 3 star
+
+●
+
+(a2) 4 star
+
+●
+
+●
+
+(a3) h1
+
+●
+
+●
+
+●
+
+(a4) h2
+
+●
+
+(a5) h3
+
+(a) Motifs counted in model simulations.
+
+●
+
+●
+
+(b1) m1
+
+●
+
+●
+
+(b2) m2
+
+●
+
+●
+
+(b3) m3
+
+(b) Additional motifs.
+
+Figure 6: Depiction of motifs considered in Sections 6 and 7.
+the hyperedge {i, j, k} is also likely to be present. Table 1 summarises the cases we consider for
+each model, and details of specific parameter choices are provided in Table 2 in Appendix H.
+To characterise the simulated hypergraphs we record subgraph counts, properties of the degree
+distribution and a measure of clustering. The particular subgraphs considered are depicted
+in Figure 6a, and the degree distribution and spread of hyperedge orders are recorded using
+the percentiles of the node degrees and edge sizes, respectively. in addition to the density of
+the hyperedges of order k = 2 and k = 3. Finally, to measure clustering, we project the
+hypergraph onto a pairwise graph, such that the edge {i, j} exists if i and j are present in the
+same hyperedge, and calculate the community structure using the leading eigenvector with the
+function cluster leading eigen() in the igraph package in R (Csardi and Nepusz, 2006).
+Figure 7 summarises the results of our study. For the model of Stasi et al. (2014) (Figure 7a)
+we see that, by comparing Cases 1 and 2, this model can express hypergraphs with very different
+degree distributions. We also observe a larger number of motif counts for Case 2 since this case
+generates denser hypergraphs. Note that the maximum hyperedge order was set to 4, and so no
+hyperedges for k ≥ 5 are generated. For the model of Ng and Murphy (2021) (Figure 7b), we see
+that the topic clustering is consistently captured for all simulated hypergraphs. Generally, the
+degree distributions are similar, however by comparing Cases 1 and 4 we note that this model can
+express different levels of connectivity. We also observe little variation in the motif counts and,
+for most cases, find that triangles are more prevalent than the hypergraph motifs considered.
+For our latent space hypergraph model (Figure 7c), we observe a greater control over the motif
+counts by comparing Cases 3 and 4 where the order k = 2 and k = 3 hyperedges are denser.
+The counts for triangles and h1 subgraphs clearly reflect the number of hyperedges of each order,
+and we also observe some control over the degree distribution and density. When we increase
+the latent dimension to d = 3 and fix all other parameters, we obtain a sparser hypergraph as is
+demonstrated by comparing Cases 1 and 5. Finally, since our model is not designed to capture
+clustering, we do not observe consistent estimates for the number of clusters.
+Here we have explored the advantages of each modelling approach and shown that our model
+presents a flexible framework that is well-suited to hypergraph data which exhibit large motif
+counts. We note our approach could be modified to express different hypergraph characteristics
+by, for example, changing the distribution on U or the choice of complex.
+
+6.2
+
+Assessing Model Fit
+
+In this section we examine the performance of our MCMC scheme through inspection of the
+predictive degree distribution. For this study, we simulate a hypergraph from the model outlined
+in Algorithm 1 with N = 50, d = 2, K = 3, r = (0.35, 0.45), ϕ0 = ϕ1 = (0.001, 0.001), µ = (0, 0)
+and Σ = ( 10 01 ). After 5000 post burn-in iterations we obtain posterior mean estimates to (2
+significant figures) Û , r̂ = (0.15, 0.19), ψ̂ 0 = ψ̂ 1 = (0.000904, 0.00021), µ̂ = (−0.029, −0.0072)
+0.019
+and Σ̂ = ( 0.087
+0.019 0.18 ). Recalling that the anchor coordinates force a scaling on the estimated
+latent positions, we note that we cannot make a direct comparison between the true and estimated
+
+17
+
+0
+50
+
+rs
+
+st
+
+st
+
+st
+
+rs
+
+●
+●
+●
+
+rs
+
+●
+●
+●
+
+●
+
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+● ●
+●●●
+● ●
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+● ●
+●
+●●
+●
+
+●●
+
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+
+●
+●
+●●
+●
+●
+
+Count
+
+0
+
+1
+
+0
+
+0
+00
+
+0
+
+0
+
+0
+
+0
+
+0
+20
+
+20
+
+40
+
+0
+60
+
+0
+
+50
+
+10
+
+0
+15
+
+0
+20
+
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+●
+●
+
+●
+●
+● ●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+
+s
+
+tri
+
+●
+●
+● ●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+● ●
+●
+●
+●
+●
+●
+●
+● ●
+●
+●
+●
+● ●
+●
+●
+●
+●
+●
+●
+●
+●
+
+s
+tri
+
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+s
+tri
+
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+
+h1
+
+●
+●
+●
+
+●
+●
+●
+
+●
+●
+
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+●
+●
+●
+
+h2
+
+●
+●
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+● ●
+●
+●
+●
+●
+●
+● ●
+●
+●
+
+●
+●
+
+h1
+h2
+Subgraphs
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+Subgraphs
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+
+●
+●
+
+●
+●
+
+h1
+h2
+Subgraphs
+
+●
+●
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+●
+●
+● ●
+●
+●
+●
+●
+
+h3
+
+●
+●
+●
+●
+●
+●
+●
+●
+● ●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+● ●
+●
+●
+●
+
+h3
+
+●
+●
+●
+
+h3
+
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+
+●
+●
+
+5
+
+3.
+
+%
+
+5
+2.
+
+●
+
+5%
+
+2.
+
+●
+
+●
+
+●
+
+●
+
+●
+
+●
+
+%
+
+50
+.
+97
+
+5%
+
+0
+
+10
+
+0
+
+20
+
+0
+30
+
+0
+40
+
+2.
+
+●
+●
+●
+
+5%
+
+●
+●
+●
+
+●
+●
+
+%
+
+50
+
+●
+●
+
+●
+●
+●
+
+%
+
+75
+
+●
+●
+●
+
+Percentiles
+
+%
+
+25
+
+●
+●
+
+●
+●
+●
+
+●
+●
+
+●
+●
+
+●
+●
+●
+●
+
+●
+●
+●
+
+5%
+
+.
+97
+
+●
+
+●
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+
+%
+
+50
+
+%
+
+75
+
+●
+●
+● ●
+●
+●
+
+Percentiles
+
+%
+
+25
+
+●
+
+●
+●
+
+%
+
+.5
+97
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+0
+
+0
+20
+
+30
+
+4
+
+00
+
+●
+● ●
+
+%
+
+5
+2.
+
+● ● ●
+●
+●
+● ●
+●
+●
+● ●
+
+●
+
+●
+●
+●
+
+●
+
+%
+
+50
+
+●
+● ●
+●
+● ● ●
+●
+●
+
+●
+●
+
+●
+●
+●
+
+%
+
+75
+
+●
+● ●
+●
+●
+● ● ●
+●
+●
+●
+
+Percentiles
+
+%
+
+25
+
+●
+●
+●
+● ● ●
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+●
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+
+9
+
+%
+
+5
+7.
+
+●
+●
+●
+●
+●
+● ●
+●
+
+●
+●
+● ●
+●
+●
+●
+
+●
+●
+
+●
+●
+●
+●
+
+(a) Uniform hypergraph model of Stasi et al. (2014).
+
+%
+
+75
+
+Percentiles
+
+%
+25
+
+●
+
+09
+06
+03
+
+0.
+0.
+0.
+=
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+
+2
+
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+=
+
+●
+●
+●
+
+3
+
+●
+●
+
+●
+●
+
+0
+
+1
+
+=
+
+2
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+●
+
+●
+●
+●
+●
+●
+
+=
+
+3
+
+●
+●
+● ●
+●
+●
+● ●
+
+k
+k
+Hyperedge order
+
+0.
+
+0.
+
+2
+
+3
+
+0.
+0.
+
+●
+●
+● ●
+●
+●
+●
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+4
+
+0.
+
+k
+k
+Hyperedge order
+
+12
+
+0.
+
+0
+2.
+
+5
+2.
+
+3
+
+5
+
+0
+
+.0
+
+3.
+
+4.
+
+2
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+%
+50
+
+%
+75
+
+Percentiles
+
+%
+25
+
+● ● ●
+
+●
+●
+
+●
+
+●
+
+●
+
+97
+
+%
+.5
+
+2
+0
+
+0
+50
+
+5
+
+0
+00
+
+75
+
+00
+
+2
+
+%
+.5
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●●
+●●
+●●
+
+●
+
+%
+50
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+%
+75
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+Percentiles
+
+%
+25
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+%
+.5
+97
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+0.
+
+0.
+
+0
+
+3
+
+0
+
+1
+
+.2
+
+0.
+
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+2
+
+●●
+●
+
+●●
+●●
+●
+●
+●
+●●
+● ●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+3
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+
+=
+=
+k
+k
+Hyperedge order
+
+(c) Latent space hypergraph model detailed in Algorithm 2.
+
+%
+.5
+
+●
+●
+●
+● ●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+● ●
+●
+
+●
+
+●
+
+●
+
+(b) Extended latent class analysis hypergraph model of Ng and Murphy (2021).
+
+5
+
+10
+
+0
+2.
+
+2
+
+.5
+
+0
+3.
+
+0
+
+4.
+
+00
+0.
+
+05
+0.
+
+10
+0.
+
+15
+0.
+
+0
+0.
+
+2
+0.
+
+4
+0.
+
+6
+0.
+
+le
+od
+m
+Measure
+
+●
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+le
+od
+m
+Measure
+
+●
+
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+le
+od
+m
+Measure
+
+0
+05
+0.
+5
+02
+0.
+0
+00
+0.
+25
+.0
+−0 0
+5
+.0
+−0
+
+●
+
+●
+
+●
+
+●
+
+●●●●
+
+le
+nc
+Measure
+
+2
+
+4
+
+6
+
+le
+nc
+Measure
+
+1.0
+
+1.5
+
+2.0
+
+2.5
+
+3.0
+
+1
+2
+3
+4
+5
+
+case
+
+1
+2
+3
+4
+
+case
+
+1
+2
+
+case
+
+le
+nc
+Measure
+
+0.950
+
+0.975
+
+1.000
+
+1.025
+
+1.050
+
+Figure 7: Summary of hypergraphs simulated from each of the models considered in Section 6.1. The cases considered are summarised
+in Table 1 and Table 2 in the Appendix.
+
+3e 5
++0
+2e 5
++0
+1e 0
++0 rs
+rs
+0e
+st
+st
+3
+4
+Subgraphs
+
+5
++0
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+
+3 4
+Subgraphs
+
+5
+
+0
+e+
+
+4
+
+0
+
+00
+
+10
+
+0
+00
+
+00
+
+0
+
+0
+00
+
+0
+
+2
+
+●
+
+●
+●
+
+rs
+
+st
+
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+3
+4
+Subgraphs
+
+0
+
+0
+15
+
+5
+
+0
+00
+
+0
+
+00
+
+1
+
+0
+00
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+Edge Size
+Edge Size
+Edge Size
+
+Count
+
+Count
+
+Node Degree
+Node Degree
+Node Degree
+
+Count
+
+Count
+
+Count
+
+Density
+Density
+Density
+
+Number of Clusters
+Number of Clusters
+Number of Clusters
+
+Modularity
+Modularity
+Modularity
+
+18
+
+0.10
+
+probability
+
+0.1
+
+0.05
+
+110
+
+100
+
+90
+
+80
+
+70
+
+60
+
+50
+
+40
+
+30
+
+0
+
+15
+
+10
+
+5
+
+0
+
+degree
+
+20
+
+0.00
+
+0.0
+
+10
+
+probability
+
+0.2
+
+degree
+
+Figure 8: Comparison of true and posterior predictive degree distributions for hyperedges of order
+k = 2 (left) and k = 3 (right). For each figure, the vertical lines and black dots correspond to
+the range and median of the probabilities of observing each degree as calculated via the posterior
+predictive. The observed degree is shown as green triangles.
+model parameters. This is further demonstrated by comparing the known and estimated latent
+coordinates in Appendix I.
+Alternatively, we can examine the posterior predictive and compare this to the simulated
+hypergraph. If the sampling procedure has produced meaningful estimates, we should find that
+there is a reasonable correspondence between these two quantities. Note however that a hypergraph is a complex object and so, in order to make a reasonable comparison, we summarise
+each hypergraph using its degree distribution. Figure 8 provides a visual comparison by showing
+the posterior predictive distribution for the probability of each degree alongside the observed
+degree distribution. To allow a more nuanced comparison we present the degree distributions
+for hyperedges with order k = 2 and k = 3 separately. Overall we see that there is reasonable
+overlap between these quantities. For completeness, we also summarise the output of the MCMC
+scheme in Appendix I where we see that the sampling procedure appears to have converged and
+the estimated latent coordinates correspond reasonably to the truth.
+
+6.3
+
+Scalability study
+
+In our MCMC scheme (see Section 5) the latent coordinates are updated via a delayed-acceptance
+(DA) step. This allows a poor proposal to be quickly rejected on a subset of the likelihood and
+we commented that DA offers computational advantages over a standard Metropolis-Hastings
+sampler. Here, we substantiate this claim on data simulated according to Algorithm 1 by comparing average per-iteration cost times for an MCMC scheme implemented with and without
+DA. Since the computational cost is closely connected to the number of nodes N and the density
+of the hypergraphs, we consider timings for hypergraphs with increasing N under two different
+density regimes, referred to as (R1) and (R2). We specify the parameters for each regime to allow
+(R1) to be sparser than (R2), and we control this through r and Σ. Details of the parameters
+used to simulate the data are given in Appendix J alongside plots which show the density of the
+simulated data.
+This study allows us to examine the scalability of our approach as N grows and to demonstrate
+the reduction in computational cost offered by DA. Figure 9 reports average per-iteration times
+for the DA MCMC scheme for both regimes in addition to the ratio of average per-iteration times
+for a DA and non-DA MCMC scheme. This figure confirms our intuitions that hypergraphs
+with a larger N are more computationally challenging, and this cost is further increased as the
+density of the hypergraphs grows. By inspecting the right-hand plot of Figure 9, we observe
+that incorporating DA into our MCMC offers a significant improvement in average per-iteration
+cost. We note that this relative improvement increases with N and is largely unaffected by the
+19
+
+DA / non−DA
+
+0.4
+0.2
+
+20
+
+40
+
+60
+
+80
+
+100
+
+0.0 0.2 0.4 0.6 0.8 1.0
+
+0.8
+0.6
+
+DA average per iteration cost
+
+0.0
+
+●
+●
+●
+
+0
+
+●
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+
+(R1)
+(R2)
+
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+0
+
+●
+●
+●
+●
+●
+●
+●●
+●
+
+20
+
+●
+●
+●
+●
+●
+●
+●
+●
+
+40
+
+60
+
+N
+
+80
+
+100
+
+N
+
+Figure 9: Summary of average per-iteration costs after 500 iterations for an MCMC implemented
+with and without delayed-acceptance (DA) for regimes (R1) (black, circle) and (R2) (red, triangle). Left: average per-iteration cost in seconds for a DA scheme. Right: ratio of average
+per-iteration cost for a DA scheme and a scheme without DA. A number less than 1 implies that
+the DA offers a computational speed up.
+
+35
+
+54
+55
+14
+
+27
+
+38
+
+3
+12
+
+31
+
+39
+
+25
+71
+
+82
+81
+
+11
+
+22
+
+18
+
+4
+
+89
+
+10
+
+7
+10
+
+34
+37
+
+48
+
+25
+41
+
+7
+
+9
+
+1
+28
+
+69
+
+51
+
+26
+
+30
+
+59
+
+15
+
+8
+
+39
+
+20
+
+1
+
+13
+
+11
+
+24
+42
+
+19
+31
+27
+
+36
+
+34
+12
+
+79
+60
+
+26
+
+58
+
+2
+
+28
+
+43
+4121
+
+(a) Grocery dataset (Section 7.1).
+
+72
+
+67
+85 68
+86
+
+49
+
+30
+
+33
+4
+
+18
+
+47
+
+3
+16
+
+61
+6
+
+16
+22
+
+24
+
+15
+66
+64
+63
+53
+
+33
+
+17
+
+32
+
+5
+
+8
+83
+76
+
+23
+32
+
+87
+
+21
+23
+29
+
+45 29
+56
+8084
+50 74
+35
+705
+38
+73
+19
+65
+88
+5777937 17
+244
+46
+
+62
+4052
+
+36
+
+5
+13
+
+20
+14
+
+40
+
+6
+
+78
+
+(b) Coauthorship dataset (Section 7.2).
+
+Figure 10: Visualisation of each of the datasets considered in Section 7. The hyperedges correspond to the observations for each dataset and the node positions are the posterior mean of the
+latent coordinates Û .
+density of the hypergraphs. Whilst K remains fixed throughout this section, we do expect the
+improvement offered by DA to increase with K.
+
+7
+
+Real data examples
+
+In this section we analyse two real world hypergraph datasets using the model detailed in Algorithm 2. The first of these considers a dataset describing co-purchases of grocery items and the
+second returns to the motivating example of academic coauthorship.
+
+7.1
+
+Grocery Items
+
+Here we consider a subset of the grocery transaction data available as part of the R package
+arules (Hahsler et al., 2021). In this example, each node corresponds to a category of items and
+each hyperedge indicates which set of items were bought together. To analyse this data we take a
+random subset of size N = 40 with K = 6 and hold back N ∗ = 4 for validation of the predictive
+distribution for additional nodes. Since the hyperedges can be expressed through the geometric
+20
+
+k=4
+
+4
+
+6
+
+8
+
+11
+
+0.3
+
+Proportion
+
+0.0
+2
+
+0.0
+
+0.2
+
+Proportion
+
+0.15
+
+Proportion
+
+0.00
+0
+
+0.6
+
+k=3
+0.4
+
+k=2
+
+0
+
+2
+
+4
+
+D
+
+6
+
+8
+
+0
+
+1
+
+D
+
+2
+
+3
+
+D
+
+(a) Node degree. Left to right: k = 2, k = 3 and k = 4.
+
+0
+
+1
+
+2
+
+3
+
+D
+
+0
+
+1
+
+2
+
+3
+
+0
+
+D
+
+0.30
+0.15
+0.00
+
+0.3
+
+Proportion
+
+0.6
+
+m3
+
+0.0
+
+0.3
+
+Proportion
+
+0.6
+
+h3
+
+0.0
+
+0.3
+
+Proportion
+
+0.6
+
+h2
+
+0.0
+
+Proportion
+
+h1
+
+1
+
+2
+D
+
+3
+
+0 2 4 6 8
+
+11
+
+D
+
+(b) Motif counts. Left to right: motif in Figure 6a3, 6a4, 6a5 and 6b3.
+
+Figure 11: Summary of predictive distributions for N ∗ additional nodes for the Grocery dataset.
+For each measure we report the proportion of predictions which are distance D from the truth,
+where D is the absolute difference between the predictive and the truth.
+or noise component of our model, we impose constraints on the noise terms to ensure that the
+set of hyperedges explained by the latent positions is non-empty. More specifically, we limit the
+order k noise terms so that they cannot exceed the density of the order k hyperedges in the
+observed hypergraph. With these constraints, we implemented our MCMC scheme for 40, 000
+iterations and discarded the first half as burn-in. Figure 10a depicts the observed hypergraph
+with the nodes positioned at posterior mean of the latent coordinates Û and we obtain the
+posterior mean estimate of the radii r̂ = (0.141, 0.147, 0.149, 0.152, 0.166). Traceplots for each
+parameter are reported in Appendix L and the average per-iteration cost for our scheme was
+0.0079 minutes.
+To select the N ∗ nodes for which we evaluate the predictive distribution, we take the nodes
+with the smallest eigen-centralities in the graph obtained by connecting all node pairs who
+share a hyperedge. To reflect how these nodes were selected, we then sample additional latent
+coordinates from the posterior predictive by first obtaining N + N ∗ samples from N µ(i) , Σ(i)
+and then selecting the N ∗ coordinates that are furthest from the mode µ(i) in terms of Euclidean
+distance. Similarly to Section 6.2, we summarise the predictive hypergraphs by considering node
+degree and motif counts and Figure 11 reports the results of this. In particular, for each measure,
+we report the proportion of predictive samples which have discrepancy D from the true observed
+value where D denotes the absolute difference between the prediction and the truth. Overall, we
+see that the majority of samples have either zero or close to zero discrepancy from the observed
+values, suggesting that we reasonably capture the unobserved interaction patterns.
+
+7.2
+
+Coauthorship for Statisticians
+
+We now repeat the analysis from the previous section for a hypergraph with larger N . In this
+section we consider a coauthorship hypergraph constructed from the DBLP dataset1 , presented
+in Mao et al. (2020) and available online here2 . From this dataset we construct a subset of size
+N = 99 with K = 4 via a random walk and, similarly to Section 7.1, we hold out N ∗ = 10 of
+1 https://dblp.uni-trier.de/xml/
+2 https://xueyumao.github.io/coauthorship.html
+
+21
+
+k=3
+
+0
+
+1
+
+2
+
+0.4
+
+Proportion
+
+0.0
+
+0.0 0.2 0.4
+
+Proportion
+
+0.4
+0.0
+
+0.2
+
+Proportion
+
+k=4
+0.8
+
+k=2
+
+3
+
+0
+
+2
+
+4
+
+D
+
+6
+
+8
+
+0
+
+2
+
+4
+
+D
+
+6
+
+D
+
+(a) Node degree. Left to right: k = 2, k = 3 and k = 4.
+
+0
+
+1
+D
+
+0
+
+1
+
+0
+
+D
+
+0.8
+0.4
+0.0
+
+0.3
+
+Proportion
+
+0.6
+
+m3
+
+0.0
+
+0.3
+
+Proportion
+
+0.6
+
+h3
+
+0.0
+
+0.3
+
+Proportion
+
+0.6
+
+h2
+
+0.0
+
+Proportion
+
+h1
+
+1
+D
+
+0
+
+1
+
+2
+
+3
+
+count
+
+(b) Motif counts. Left to right: motif in Figure 6a3, 6a4, 6a5 and 6b3.
+
+Figure 12: Summary of predictive distributions for N ∗ additional nodes for the coauthorship
+dataset. For each measure we report the proportion of predictions which are distance D from
+the truth, where D is the absolute difference between the predictive and the truth.
+these nodes according to the graph eigen-centrality and use these to validate predictive inference.
+We fit the model outlined in Section 3.4 by implementing our MCMC for 80, 000 iterations
+and taking the initial 3/5th of these as burn-in. Given equivalent restrictions on the noise
+parameters as described for the previous example, we obtain the posterior mean of the radii
+r̂ = (0.086, 0.096, 0.103) and the posterior means of the latent position as shown in Figure
+10b. The average per-iteration cost for our scheme was 0.0106 minutes and traceplots showing
+convergence for the model parameters are given in Appendix L. A summary of the predictive
+distribution of the N ∗ additional nodes is given in Figure 12 and, for all summaries of the
+predicted interactions, we find that the majority of the discrepancies between the predicted and
+true values are either zero or close to zero. This suggests that our predicted interaction patterns
+are close to the truth.
+To provide further justification for our assumption of increasing radii we compare our model
+to a restriction in which rk = r for k = 2, 3, . . . , K. In the restricted model the geometric
+component is simplicial and, since this data example is highly non-simplicial, we expect fewer
+of the hyperedges to be explained by this component. To verify this, we present the latent
+coordinate traceplots for a subset of the data in Figure 13 for each of these models. By comparing
+the middle and right panels of this figure, we see that the latent coordinates are more constrained
+for our model with a non-simplicial geometric component. Indeed, by inspecting the hyperedges
+generated from each of the samples of the latent positions, we find that our model explains all
+but one of the observed interactions through the geometric component and the restricted model
+only explains two hyperedges through the geometric component. This matches our intuition and
+helps strengthen our case for the utility of our model.
+
+8
+
+Discussion
+
+In this article we have introduced a model for hypergraph data in which each node is associated with a coordinate in Rd that influences the interaction patterns. Our approach extends
+the framework in Hoff et al. (2002) to the hypergraph setting via a modification of a nerve
+
+22
+
+Figure 13: Comparison between latent positions for subset of the coauthorship network on nodes
+{3, 4, 14, 54, 55}. Left: observed interactions. Middle: traceplot of latent positions for model
+with rk = r. Right: traceplot of latent positions for our model with rk > rk−1 .
+construction that allows us to express non-simplicial hypergraphs. This application of a nerve
+draws a connection between stochastic geometry and latent space network models, and allows us
+to avoid the prohibitively expensive likelihood associated with the direct hypergraph analogue
+of Hoff et al. (2002). Similarly to the case of pairwise interactions, the latent representation
+imposes appealing properties on the hypergraphs generated from our model. Most notably, we
+observe high levels of transitivity and motif counts which suggest interactions among subsets of
+a group of nodes often occur jointly, and this feature is highlighted and contrasted with existing
+hypergraph models in the simulation in Section 6.1. We stress that the geometric component of
+our model may however be unable to express certain hypergraph relationships. For example, the
+maximum number of leaves in a star will be limited by the dimension of the latent space. This
+may be mediated by either choosing an alternative convex set to generate the nerve, increasing
+the probability of hyperedge modification, or adopting a different specification for the latent
+positions.
+The modification of the indicators for the hyperedges in our model has two main motivations.
+Firstly, without this modification, the likelihood of observing a given hypergraph is binary and
+equal to one only when there is a perfect correspondence between the observed and estimated
+hyperedges. Secondly, the modification extends the support of the model to the space of all
+hypergraphs. Whilst techniques such as tempering could be used to resolve the model fitting
+issues associated with a binary likelihood, the challenge of characterising the support of the model
+would remain and it would be unclear a priori whether a suitable geometric representation of
+an observed hypergraph could be found. From (14) we observed that a hypergraph generated
+from our model is a modification of a nsRGH and, as the probability of modification grows, the
+generated hypergraphs will behave more like the hypergraph analogue to an Erdős-Rényi random
+graph. In the context of networks, Le et al. (2018) investigate the recovery of an underlying true
+network given a set of noisy observations. Whilst this differs from our setting, we can view our
+model in a similar way in which the nsRGH represents the truth. Additionally, we can draw
+a parallel with our approach to a regression comprised of a trend and noise term. In the most
+interesting case, the trend would explain as much of the data as possible and this helps motivate
+our observations on the magnitude of the probability of hyperedge modification.
+Our proposed approach provides a framework for modelling hypergraph data that could be extended to a number of different settings, and examples include modelling non-binary hyperedges,
+the addition of community structure analogously to (Handcock et al., 2007), or the introduction
+of covariate information. Additional avenues for future work follow from considering alternative
+choices for the nerve construction, latent geometry and restrictions on the radii. For example,
+we could instead utilise the more scalable Vietoris-Rips complex (Vietoris, 1927), consider non-
+
+23
+
+Euclidean embeddings (Krioukov et al., 2010) or explore models with node-specific radii. Whilst
+there exist a myriad of possible extensions, it is important to stress that estimation for a given
+modification of our model may be challenging. Even for our proposed model, scalability remains
+a key limitation and this may be exacerbated by certain extensions. In this article we found that
+delayed-acceptance offered improvements in the computational efficiency of our MCMC sampler,
+and it remains an open line of enquiry to consider how methodology to improve scalability for
+latent space networks, such as likelihood approximations (Raftery et al., 2012; Rastelli et al.,
+2018) or variational methods (Salter-Townshend and Murphy, 2013), may be adapted to this
+setting.
+
+Acknowledgements
+We acknowledge the support of the EPSRC funded EP/L015692/1 STOR-i CDT, and Christopher Nemeth acknowledges the support of EPSRC grants EP/S00159X/1, EP/R01860X/1 and
+EP/V022636/1. This work was also supported, in part, by NSF awards CAREER IIS-1149662
+and IIS-1409177, by ONR awards YIP N00014-14-1-0485 and N00014-17-1-2131. Thank you to
+Tin Lok James Ng for providing the Star Wars dataset analysed in a previous version of this
+work and Matthew Kahle, Sandipan Roy, Brendan Murphy and Marco Battiston for helpful comments. We also acknowledge the High End Computing facility at Lancaster University which
+was used to implement our simulations and data exmples.
+
+References
+Ahn, K., Lee, K., and Suh, C. (2019). Community recovery in hypergraphs. IEEE Transactions
+on Information Theory, 65(10):6561–6579.
+Asta, D. M. and Shalizi, C. R. (2015). Geometric network comparisons. In Proceedings of the
+Thirty-First Conference on Uncertainty in Artificial Intelligence, pages 102–110.
+Balasubramanian, K. (2021). Nonparametric modeling of higher-order interactions via hypergraphons. Journal of Machine Learning Research, 22(146):1–35.
+Banterle, M., Grazian, C., Lee, A., and Robert, C. P. (2019). Accelerating metropolis-hastings
+algorithms by delayed acceptance. Foundations of Data Science, 1(2):103–128.
+Barabási, A.-L. and Pósfai, M. (2016). Network science. Cambridge University Press, Cambridge.
+Battiston, F., Cencetti, G., Iacopini, I., Latora, V., Lucas, M., Patania, A., Young, J.-G., and
+Petri, G. (2020). Networks beyond pairwise interactions: Structure and dynamics. Physics
+Reports, 874:1 – 92.
+Berg, M. d., Cheong, O., Kreveld, M. v., and Overmars, M. (2008). Computational Geometry:
+Algorithms and Applications. Springer-Verlag TELOS, Santa Clara, CA, USA, 3rd ed. edition.
+Bianconi, G. and Rahmede, C. (2017). Emergent hyperbolic network geometry. Scientific reports,
+7:41974.
+Bobrowski, O. and Kahle, M. (2018). Topology of random geometric complexes: a survey. Journal
+of applied and Computational Topology, 1(3):331–364.
+Bobrowski, O. and Krioukov, D. (2021). Random simplicial complexes: Models and phenomena.
+arXiv preprint arXiv:2105.12914.
+24
+
+Bobrowski, O. and Oliveira, G. (2019). Random Čech complexes on riemannian manifolds.
+Random Structures & Algorithms, 54(3):373–412.
+Bookstein, F. L. (1986). Size and shape spaces for landmark data in two dimensions. Statistical
+Science, 1(2):181–222.
+Bretto, A. (2013). Hypergraph theory. An introduction. Mathematical Engineering. Springer
+International Publishing.
+Chazal, F. and Michel, B. (2017). An introduction to topological data analysis: fundamental
+and practical aspects for data scientists.
+Chien, I., Lin, C.-Y., and Wang, I.-H. (2018). Community detection in hypergraphs: Optimal statistical limit and efficient algorithms. In Storkey, A. and Perez-Cruz, F., editors, Proceedings of
+the Twenty-First International Conference on Artificial Intelligence and Statistics, volume 84
+of Proceedings of Machine Learning Research, pages 871–879, Playa Blanca, Lanzarote, Canary
+Islands. PMLR.
+Costa, A. and Farber, M. (2016). Random simplicial complexes. In Configuration spaces, pages
+129–153. Springer.
+Courtney, O. T. and Bianconi, G. (2016). Generalized network structures: The configuration
+model and the canonical ensemble of simplicial complexes. Physical Review E, 93(6):062311.
+Csardi, G. and Nepusz, T. (2006). The igraph software package for complex network research.
+InterJournal, Complex Systems:1695.
+D’Angelo, S., Murphy, T. B., and Alfò, M. (2019). Latent space modelling of multidimensional
+networks with application to the exchange of votes in eurovision song contest. Ann. Appl.
+Stat., 13(2):900–930.
+David, H. A. and Nagaraja, H. N. (2004). Order statistics. John Wiley & Sons.
+Doreian, P., Batagelj, V., and Ferligoj, A. (2004). Generalized blockmodeling of two-mode
+network data. Social networks, 26(1):29–53.
+Dryden, I. L. and Mardia, K. V. (1998). Statistical Shape Analysis. Wiley, Chichester.
+Duchesne, P. and de Micheaux, P. L. (2010). Computing the distribution of quadratic forms:
+Further comparisons between the liu-tang-zhang approximation and exact methods. Computational Statistics and Data Analysis, 54:858–862.
+Edelsbrunner, H. and Harer, J. (2010). Computational Topology - an Introduction. American
+Mathematical Society.
+Ergün, G. (2002). Human sexual contact network as a bipartite graph. Physica A: Statistical
+Mechanics and its Applications, 308(1-4):483–488.
+Fosdick, B. K., Larremore, D. B., Nishimura, J., and Ugander, J. (2018). Configuring random
+graph models with fixed degree sequences. Siam Review, 60(2):315–355.
+Friel, N., Rastelli, R., Wyse, J., and Raftery, A. E. (2016). Interlocking directorates in irish
+companies using a latent space model for bipartite networks. Proceedings of the National
+Academy of Sciences, 113(24):6629–6634.
+
+25
+
+Gamerman, D. and Lopes, H. F. (2006). Markov Chain Monte Carlo: Stochastic Simulation for
+Bayesian Inference. Chapman and Hall/CRC, 2 edition.
+Ghoshdastidar, D. and Dukkipati, A. (2017). Consistency of spectral hypergraph partitioning
+under planted partition model. The Annals of Statistics, 45(1):289–315.
+Gilliland, D. C. (1962). Integral of the bivariate normal distribution over an offset circle. Journal
+of the American Statistical Association, 57(300):758–768.
+Goldenberg, A., Zheng, A. X., Fienberg, S. E., and Airoldi, E. M. (2010). A survey of statistical
+network models. Foundations and Trends in Machince Learning, 2(2):129–233.
+Guillaume, J.-L. and Latapy, M. (2006). Bipartite graphs as models of complex networks. Physica
+A: Statistical Mechanics and its Applications, 371(2):795–813.
+Hahsler, M., Buchta, C., Gruen, B., and Hornik, K. (2021). arules: Mining Association Rules
+and Frequent Itemsets. R package version 1.6-8.
+Handcock, M. S., Raftery, A. E., and Tantrum, J. M. (2007). Model-based clustering for social
+networks. Journal of the Royal Statistical Society: Series A (Statistics in Society), 170(2):301–
+354.
+Helske, J. (2021). ramcmc: Robust Adaptive Metropolis Algorithm. R package version 0.1.1.
+Hoff, P. D., Raftery, A. E., and Handcock, M. S. (2002). Latent space approaches to social
+network analysis. Journal of the American Statistical Association, 97(460):1090–1098.
+Ji, P. and Jin, J. (2016). Coauthorship and citation networks for statisticians. The Annals of
+Applied Statistics, 10(4):1779–1812.
+Kahle, M. (2014). Topology of random simplicial complexes: a survey. AMS Contemporary
+Volumes in Mathematics, Algebraic Topology: Applications and New Directions, 620:201–222.
+Kahle, M. (2017). Random simplicial complexes. In Toth, C. D., O’Rourke, J., and Goodman,
+J. E., editors, Handbook of discrete and computational geometry, chapter 22, pages 581–604.
+CRC press.
+Kim, B., Lee, K. H., Xue, L., and Niu, X. (2018). A review of dynamic network models with
+latent variables. Statistics surveys, 12:105.
+Kim, C., Bandeira, A. S., and Goemans, M. X. (2018). Stochastic Block Model for Hypergraphs: Statistical limits and a semidefinite programming approach. arXiv e-prints, page
+arXiv:1807.02884.
+Kitsak, M., Papadopoulos, F., and Krioukov, D. (2017). Latent geometry of bipartite networks.
+Physical Review E, 95(3):032309.
+Kolaczyk, E. D. (2009). Statistical Analysis of Network Data: Methods and Models. Springer
+Publishing Company, Incorporated, 1st edition.
+Krioukov, D., Papadopoulos, F., Kitsak, M., Vahdat, A., and Boguñá, M. (2010). Hyperbolic
+geometry of complex networks. Phys. Rev. E, 82:036106.
+Krivitsky, P. N., Handcock, M. S., Raftery, A. E., and Hoff, P. D. (2009). Representing degree
+distributions, clustering, and homophily in social networks with latent cluster random effects
+models. Social Networks, 31(3):204 – 213.
+26
+
+Le, C. M., Levin, K., and Levina, E. (2018). Estimating a network from multiple noisy realizations. Electronic Journal of Statistics, 12(2):4697–4740.
+Liu, D., Blenn, N., and Mieghem, P. V. (2013). Characterising and modelling social networks with
+overlapping communities. International Journal of Web Based Communities, 9(3):371–391.
+Lunagómez, S., Mukherjee, S., Wolpert, R. L., and Airoldi, E. M. (2017). Geometric representations of random hypergraphs. Journal of the American Statistical Association, 112(517):363–
+383.
+Lunagómez, S., Olhede, S. C., and Wolfe, P. J. (2020). Modeling network populations via graph
+distances. Journal of the American Statistical Association, pages 1–18.
+Maechler, M., Rousseeuw, P., Struyf, A., Hubert, M., and Hornik, K. (2019). cluster: Cluster Analysis Basics and Extensions. R package version 2.0.9 — For new features, see the
+‘Changelog’ file (in the package source).
+Mao, X., Sarkar, P., and Chakrabarti, D. (2020). Estimating mixed memberships with sharp
+eigenvector deviations. Journal of the American Statistical Association, pages 1–13.
+Marchette, D. (2021). HyperG: Hypergraphs in R. R package version 1.0.0.
+Marin, J.-M., Pudlo, P., Robert, C. P., and Ryder, R. J. (2012). Approximate bayesian computational methods. Statistics and Computing, 22(6):1167–1180.
+McCormick, T. H. and Zheng, T. (2015). Latent surface models for networks using aggregated
+relational data. Journal of the American Statistical Association, 110(512):1684–1695.
+Ng, T. L. J. and Murphy, T. B. (2021). Model-based clustering for random hypergraphs. Advances
+in Data Analysis and Classification, pages 1–33.
+Pal, S. and Zhu, Y. (2019). Community Detection in the Sparse Hypergraph Stochastic Block
+Model. arXiv e-prints, page arXiv:1904.05981.
+Penrose, M. (2003). Random Geometric Graphs. Oxford Studies in Probability.
+Petersen, K. B. and Pedersen, M. S. (2012). The matrix cookbook. Version 20121115.
+Pronzato, L., Wynn, H. P., and Zhigljavsky, A. (2019). Bregman divergences based on optimal
+design criteria and simplicial measures of dispersion. Statistical Papers, 60(2):195–214.
+Raftery, A. E., Niu, X., Hoff, P. D., and Yeung, K. Y. (2012). Fast inference for the latent space
+network model using a case-control approximate likelihood. Journal of Computational and
+Graphical Statistics, 21(4):901–919.
+Rastelli, R., Friel, N., and Raftery, A. E. (2016). Properties of latent variable network models.
+Network Science, 4(4):407–432.
+Rastelli, R., Maire, F., and Friel, N. (2018). Computationally efficient inference for latent position
+network models. arXiv e-prints, page arXiv:1804.02274.
+Salter-Townshend, M. and McCormick, T. H. (2017). Latent space models for multiview network
+data. The Annals of Applied Statistics, 11(3):1217–1244.
+
+27
+
+Salter-Townshend, M. and Murphy, T. B. (2013). Variational bayesian inference for the latent
+position cluster model for network data. Computational Statistics & Data Analysis, 57(1):661
+– 671.
+Salter-Townshend, M., White, A., Gollini, I., and Murphy, T. B. (2012). Review of statistical
+network analysis: models, algorithms, and software. Statistical Analysis and Data Mining:
+The ASA Data Science Journal, 5(4):243–264.
+Sarkar, P. and Moore, A. W. (2006). Dynamic social network analysis using latent space models. In Weiss, Y., Schölkopf, B., and Platt, J. C., editors, Advances in Neural Information
+Processing Systems 18, pages 1145–1152. MIT Press.
+Stasi, D., Sadeghi, K., Rinaldo, A., Petrović, S., and Fienberg, S. E. (2014). β models for random
+hypergraphs with a given degree sequence. ArXiv e-prints.
+Tang, M., Athreya, A., Sussman, D. L., Lyzinski, V., Park, Y., and Priebe, C. E. (2017). A
+semiparametric two-sample hypothesis testing problem for random graphs. Journal of Computational and Graphical Statistics, 26(2):344–354.
+Teerapabolarn, K. (2014). An improvement of poisson approximation for sums of dependent
+bernoulli random variables. Communications in Statistics - Theory and Methods, 43(8):1758–
+1777.
+The GUDHI Project (2021). GUDHI User and Reference Manual. GUDHI Editorial Board, 3.4.1
+edition.
+Vasques Filho, D. and O’Neale, D. R. (2020). Latent space generative model for bipartite
+networks. In International Conference on Network Science, pages 3–16. Springer.
+Vietoris, L. (1927). Über den höheren zusammenhang kompakter räume und eine klasse von
+zusammenhangstreuen abbildungen. Mathematische Annalen, pages 454–472.
+Vihola, M. (2012). Robust adaptive Metropolis algorithm with coerced acceptance rate. Statistics
+and Computing, 22(5):997–1008.
+Wang, J.-W., Rong, L.-L., Deng, Q.-H., and Zhang, J.-Y. (2010). Evolving hypernetwork model.
+The European Physical Journal B, 77(4):493–498.
+Wang, P., Pattison, P., and Robins, G. (2013). Exponential random graph model specifications
+for bipartite networks—a dependence hierarchy. Social networks, 35(2):211–222.
+Wu, Z., Menichetti, G., Rahmede, C., and Bianconi, G. (2015). Emergent complex network
+geometry. Scientific reports, 5(1):1–12.
+Young, J.-G., Petri, G., Vaccarino, F., and Patania, A. (2017). Construction of and efficient
+sampling from the simplicial configuration model. Physical Review E, 96(3):032312.
+Zhong, Y., Arandjelovic, R., and Zisserman, A. (2018). Compact deep aggregation for set
+retrieval. In Proceedings of the European Conference on Computer Vision (ECCV) Workshops,
+pages 0–0.
+Zuev, K., Eisenberg, O., and Krioukov, D. (2015). Exponential random simplicial complexes.
+Journal of Physics A: Mathematical and Theoretical, 48(46):465002.
+
+28
+
+●
+
+2
+
+1.2
+
+●
+
+●
+
+●
+●
+●
+● ●
+
+●
+
+●
+
+●
+●●
+●
+●
+
+●
+
+●
+
+●
+
+●
+●
+● ●
+●
+●
+
+●
+
+●
+●
+●
+
+●
+●
+
+●
+
+●
+●
+
+●
+
+● ●●
+●
+●
+
+●
+
+0
+
+1
+
+2
+
+−0.5
+
+x
+
+●
+●
+●
+
+●
+
+0.0
+
+● ●
+●●
+
+●
+
+●
+
+●
+
+−1
+
+●
+●
+
+●
+
+●
+
+0.0
+
+−2
+
+●
+●●
+●●
+
+●
+●
+
+0.8
+
+●
+
+●
+
+y
+
+●
+●●
+
+●
+●●
+
+●●
+
+0.4
+
+1
+
+●
+●
+●
+●
+●● ●
+●
+
+0
+
+●
+
+●
+
+●
+
+●
+
+−1
+
+y
+
+●
+● ●
+
+●
+
+●
+
+0.5
+
+●
+●
+●
+
+●
+●
+●
+
+●
+●
+
+●
+
+●
+●
+
+1.0
+
+x
+
+Figure 14: Bookstein transformation in R2 . Left: original coordinates. Right: transformed
+Bookstein coordinates. The points highlighted in red are mapped to (−1/2, 0) and (1/2, 0).
+
+A
+
+Bookstein coordinates
+
+In Bookstein coordinates a set of points are chosen as the anchor points. These points are fixed
+in the space and all other points are translated, rotated and scaled accordingly. In Appendix A.1
+we describe the Bookstein coordinates in R2 , and in Appendix A.2 we describe the Bookstein
+coordinates in R3 .
+
+A.1
+
+Bookstein coordinates in R2
+
+Section 2.3.2 of Dryden and Mardia (1998) details the Bookstein coordinates in R2 . In this case,
+B
+B
+B
+B
+B
+we set the anchor points uB
+1 = (u11 , u12 ) and u2 = (u21 , u22 ) to be (−1/2, 0) and (1/2, 0), respectively. Let U B denote the Bookstein coordinates and U denote the untransformed coordinates.
+Then U B is given by
+U B = cR(U − b)
+=p
+
+
+
+1
+B 2
+B
+B 2
+(uB
+21 − u11 ) + (u22 − u12 )
+
+cos(a)
+− sin(a)
+
+
+
+
+B
+1 uB
+sin(a)
+11 + u21
+,
+U−
+B
+cos(a)
+2 uB
+12 + u22
+
+(27)
+
+B
+B
+B
+where a = arctan{(uB
+22 − u12 )/(u21 − u11 )}. The Bookstein transformation can hence be seen
+as a translation, rotation and re-scaling of the coordinates U . Figure 14 shows an example of
+the Bookstein transformation in R2 .
+Furthermore, if U ∼ N (µ, Σ), then we know that U B ∼ N (µB , ΣB ) where
+
+µB = cR(µ − b),
+B
+
+2
+
+T
+
+Σ = c RΣR .
+
+A.2
+
+(28)
+(29)
+
+Bookstein coordinates in R3
+
+Section 4.3.3 of Dryden and Mardia (1998) gives the Bookstein transformation for U where ui ∈
+B
+B
+B
+B
+R3 . Following from (27) we first set uB
+1 = (−1/2, 0, 0), u2 = (1/2, 0, 0) and u3 = (u31 , u32 , 0).
+Then for i = 4, 5, . . . , N and l = 1, 2, 3 we calculate
+1
++ uB
+wil = uil − (uB
+2l ).
+2 1l
+29
+
+(30)
+
+The Bookstein coordinate uB
+i for i = 4, 5, . . . , N is then given by
+uB
+i = R1 R2 R3 (wi1 , wi2 , wi3 )/D12
+
+(31)
+
+where
+
+
+1
+0
+0
+R1 = 0 cos(φ) sin(φ)  ,
+0 − sin(φ) cos(φ)
+
+
+cos(θ) sin(θ) 0
+R3 = − sin(θ) cos(θ) 0 ,
+0
+0
+1
+
+
+
+
+cos(ω) 0 sin(ω)
+0
+1
+0 
+R2 = 
+− sin(ω) 0 cos(ω)
+
+(32)
+
+2
+2
+2 1/2
+D12 = 2(w21
++ w22
++ w23
+) .
+
+(33)
+
+Furthermore, we have
+θ =arctan(w22 /w21 )
+
+(34)
+
+2
+2 1/2
+ω =arctan(w23 /(w21
++ w22
+) )
+
+ 2
+2
+(w21 + w22
+)w33 − (w21 w31 + w22 w32 )w23
+.
+φ =arctan
+2 + w 2 + w 2 )1/2 (w w
+(w21
+21 32 − w31 w22 )
+22
+23
+
+(35)
+(36)
+
+We see that the transformation in R3 is more involved than in R2 since we need to consider
+the effect of rotations over three different axes. Note that R1 , R2 and R3 correspond to a rotation
+around the x, y and z axes, respectively.
+
+B
+
+Modifying the Hyperedge Indicators
+
+In the generative model detailed in Algorithm 1, the indicators for all order k hyperedges are
+modified with probability ϕk . Since the probability ϕk is small, we expect very few of the N
+k
+possible order k hyperedges to be modified and so naively simulating a Bernoulli(ϕk ) random
+variable for each hyperedge is needlessly computationally expensive. Alternately, we can instead
+sample the number of order k hyperedges whose indicator we modify, nk , and then uniformly
+sample nk hyperedges from EN,k .
+To sample an order k hyperedge, we require a sample from the ordered set {i1 < i2 <
+· · · < ik |i1 , i2 , . . . , ik ∈ {1, 2, . . . , N }}. Since the hyperedge indices are strictly increasing, it
+is sufficient to simply obtain k samples from {1, 2, . . . , N } without replacement and order this
+sample as follows.
+1. Sample indices j1:k = {j1 , j2 , . . . , jk } from {1, 2, . . . , N } without replacement.
+2. Set ek = {i1 , i2 , . . . , ik } = {jσ(1) , jσ(2) , . . . , jσ(k) } where σ(l) denotes the index of the lth
+largest element of j1:k so that the elements of ek are increasing.
+We note that this procedure ignores the dependence between samples. However, we expect
+this effect to be negligible since the majority of hyperedges are not modified. Furthermore, we
+can also adapt this procedure for the model detailed in Algorithm 2.
+
+C
+
+Conditional Posterior Distributions
+
+C.1
+
+Conditional posterior for µ
+
+The conditional posterior for µ is given by
+p(µ|U , Σ, mµ , Σµ ) ∝ p(U |µ, Σ)p(µ|mµ , Σµ )
+30
+
+(37)
+
+QN
+where p(µ|mµ , Σµ ) = N (mµ , Σµ ) and p(U |µ, Σ) = i=1 N (ui |µ, Σ).
+We have
+(
+)
+N
+1X
+1
+T −1
+T −1
+p(µ|U , Σ, mµ , Σµ ) ∝ exp −
+(ui − µ) Σ (ui − µ) − (µ − mµ ) Σµ (µ − mµ )
+2 i=1
+2
+
+(38)
+
+By applying the result in Section of 8.1.7 Petersen and Pedersen (2012) we obtain
+!
+!
+N
+X
+−1
+−1 −1
+−1
+−1
+−1
+−1 −1
+p(µ|U , Σ, mµ , Σµ ) = N (N Σ + Σµ )
+Σ
+ui + Σµ mµ , (N Σ + Σµ )
+. (39)
+i=1
+
+C.2
+
+Conditional posterior for Σ
+
+The conditional posterior for Σ is given by
+p(Σ|U , µ, Φ, ν) ∝ p(U |µ, Σ)p(Σ|Φ, ν)
+
+(40)
+
+QN
+
+where p(Σ|Φ, ν) = W −1 (Φ, ν) and p(U |µ, Σ) = i=1 N (ui |µ, Σ).
+We have
+
+
+
+
+N
+Y
+
+1
+1
+1
+t −1
+−1
+−(ν+d+1)/2
+p(Σ|U , µ, Φ, ν) ∝
+(u
+−
+µ)
+Σ
+(u
+−
+µ)
+|Σ|
+exp
+−
+tr
+ΦΣ
+exp
+−
+i
+i
+2
+2
+|Σ|1/2
+i=1
+(
+∝ |Σ|−(ν+d+N +1)/2 exp −
+
+"
+
+N
+X
+
+1
+tr Σ−1
+(ui − µ)(ui − µ)T
+2
+i=1
+
+(41)
+#)
+
+!
++ tr(ΦΣ−1 )
+
+(42)
+(
+
+1
+∝ |Σ|−(ν+d+N +1)/2 exp − tr
+2
+Line (43) follows from the symmetry of Σ and
+operator. Hence, we obtain
+p(Σ|U , µ, Φ, ν) = W
+
+−1
+
+"N
+X
+
+#
+
+!)
+
+(ui − µ)(ui − µ)T + Φ Σ−1
+
+.
+
+(43)
+
+i=1
+
+PN
+
+T
+i=1 (vi − µ)(vi − µ) , and properties of the trace
+
+N
+X
+Φ+
+(ui − µ)(ui − µ)T , ν + N
+
+!
+.
+
+(44)
+
+i=1
+
+C.3
+
+Conditional posterior for ψk0
+
+The conditional posterior for ψk0 is given by
+
+
+
+p ψk0 |U , r, hN,K , a0k , b0k ∝ L U , r, ψ 1 , ψ 0 ; hN,K p ψk0 |a0k , b0k
+
+
+
+where L U , r, ψ 1 , ψ 0 ; hN,K is as in (12) and p ψk0 |a0k , b0k = Beta a0k , b0k .
+We have
+p(ψk0 |U , r, hN,K , a0k , b0k )
+d(01) (gN,K (U ,r),hN,K )
+d(00) (gN,K (U ,r),hN,K ) 0 a0k −1
+b0 −1
+∝ ψk0 k
+1 − ψk0 k
+ψk
+1 − ψk0 k
+d(01) (gN,K (U ,r),hN,K )+a0k −1
+d(00) (gN,K (U ,r),hN,K )+b0k −1
+∝ ψk0 k
+1 − ψk0 k
+.
+31
+
+(45)
+
+(46)
+(47)
+
+Hence, we obtain
+p(ψk0 |U , r, hN,K , a0k , b0k )
+
+
+(01)
+(00)
+= Beta dk (gN,K (U , r), hN,K ) + a0k , dk (gN,K (U , r), hN,K ) + b0k .
+
+C.4
+
+(48)
+
+Conditional posterior for ψk1
+
+The conditional posterior for ψk1 is given by
+
+
+
+p ψk1 |U , r, hN,K , a1k , b1k ∝ L U , r, ψ 1 , ψ 0 ; hN,K p ψk1 |a1k , b1k
+
+(49)
+
+
+
+
+where L U , r, ψ 1 , ψ 0 ; hN,K is as in (12) and p ψk1 |a1k , b1k = Beta a1k , b1k .
+We have
+p(ψk1 |U , r, hN,K , a1k , b1k )
+b1 −1
+d(11) (gN,K (U ,r),hN,K ) 1 a1k −1
+d(10) (gN,K (U ,r),hN,K )
+ψk
+1 − ψk1 k
+1 − ψk1 k
+∝ ψk1 k
+d(11) (gN,K (U ,r),hN,K )+b1k −1
+d(10) (gN,K (U ,r),hN,K )+a1k −1
+.
+1 − ψk1 k
+∝ ψk1 k
+
+(50)
+(51)
+
+Hence, we obtain
+p(ψk1 |U , r, hN,K , a1k , b1k )
+
+
+(10)
+(11)
+= Beta dk (gN,K (U , r), hN,K ) + a1k , dk (gN,K (U , r), hN,K ) + b1k .
+
+D
+
+(52)
+
+MCMC initialisation
+
+To initialise the latent coordinates U we rely on generalised multidimensional scaling (GMDS)
+(similarly to Sarkar and Moore (2006)) with the shortest path length as the distance measure. We
+calculate this on a weighted adjacency matrix which incorporates the intuition than nodes which
+appear in a hyperedge are likely closer than nodes which only share a pairwise edge. Given an
+initial value of U we then transform these coordinates onto the Bookstein space of coordinates,
+where we specify our anchor points so that they lie close to the smallest axis of variation as
+indicated by PCA applied to U0 . Our initialisation procedure for U is given in Algorithm 4.
+The radii r depend on the scale of U , and so they are initialised in terms of U0 . Given the
+initial latent coordinates, r0 is chosen to be the minimum radius which induces all edges that are
+present in hN,K . The noise parameters ψ 0 and ψ 1 are initialised by sampling from their prior,
+where the prior values suggest that the perturbations are small.
+To initialise the parameters µ and Σ we use an ABC scheme (see Marin et al. (2012) for an
+overview). In this scheme we first sample µ and Σ from their priors and then sample a hypergraph given r0 . By comparing summary statistics of the sampled and observed hypergraphs, we
+determine whether or not our sampled hypergraph is similar enough to the observed hypergraph.
+If so, we accept the sampled µ and Σ. We choose the number of hyperedges of order k = 2, the
+number of hyperedges of order k = 3 and the number of triangles as our summary statistics.
+This initialisation scheme is detailed in Algorithm 5 and the full initialisation scheme is given in
+Algorithm 6.
+
+32
+
+Algorithm 4 Initialise U .
+Input: Observed hypergraph hN,K
+1) Let A ∈ RN ×N denote a weighted adjacency matrix.
+For i, j ∈ {1, 2, . . . , N }, if {i, j} are connected by a hyperedge
+- let A(i,j) = 1 if {i, j} are only connected by a hyperedge of order k = 2,
+- let A(i,j) = λ if {i, j} are connected by a hyperedge of order k > 2.
+2) Find the distance matrix D ∈ RN ×N , where D(i,j) is the shortest path between
+nodes {i, j} in the weighted graph determined by A. For i = j, let D(i,j) = 0.
+3) Apply MDS to D to obtain coordinates U0 ∈ RN ×d .
+4) Apply PCA to U0 and determine the axis of smallest variation. Specify anchor
+coordinates by finding points in U0 along this axis.
+5) Given the index of the anchor points, transform U0 onto Bookstein coordinates
+(see Appendix A).
+Algorithm 5 Initialise µ and Σ.
+Input: Hypergraph hN,K , r0 , ψ00 , ψ01 , µ ∼ N (mµ , Σµ ), Σ ∼ W −1 (Φ, ν), Nsmp and .
+1) Calculate T (hN,K ), where T (·) is a vector of hypergraph summary statistics.
+Let n = 0.
+2) While n < Nsmp
+-Sample µ∗ ∼ N (mµ , Σµ ) and Σ∗ ∼ W −1 (Φ, ν).
+-Sample u∗i ∼ N (µ∗ , Σ∗ ) for i = 1, 2, . . . , N .
+Let U ∗ be the N × d matrix whose ith row is u∗i .
+-Given initial r0 , determine the hypergraph gN,K (U ∗ , r0 ).
+∗
+by the hypergraph obtained by modifying gN,K (U ∗ , r0 ) with noise
+-Let gN,K
+ψ00 and ψ01
+
+∗
+.
+-Calculate T gN,K
+∗
+)| < 
+-If |T (hN,K ) − T (gN,K
+Accept samples µ∗ and Σ∗ .
+3) Let µ0 and Σ0 be the average of Nsmp samples.
+
+E
+
+Practicalities
+
+To implement the MCMC scheme given in Algorithm 3 there are a number of practical considerations we must address. In this section we comment on these where, in E.1 we discuss an
+approach for determining the presence of a hyperedge of arbitrary order and in E.2 we discuss
+efficient evaluation of the likelihood.
+
+E.1
+
+Smallest Enclosing Ball
+
+To determine whether a hyperedge ek = {i1 , i2 , . . . , ik } is present in g(U , r), we need to check
+whether Brk (ui1 ) ∩ Brk (ui2 ) ∩ · · · ∩ Brk (uik ) 6= ∅. This is equivalent to checking whether the
+coordinates {ui1 , ui2 , . . . , uik } are contained within a ball of radius rk (Edelsbrunner and Harer,
+2010, Section 3.2) (see Figure 15). Therefore, we require
+1. Determine the smallest enclosing ball B for the coordinates {ui1 , ui2 , . . . , uik }.
+(g)
+
+(g)
+
+2. If the radius of B is less than rk take yek = 1, otherwise yek = 0.
+
+33
+
+Algorithm 6 Procedure for initialising MCMC scheme in Algorithm 3.
+Input Observed hypergraph hN,K
+1) Determine U0 by applying Algorithm 4.
+2) Let initial radii r0 be the smallest radii which induce all hyperedges observed in
+hN,K , conditional on U0 .
+3) Sample ψ00 and ψ01 from their prior distributions.
+4) Sample µ0 and Σ0 by applying Algorithm 5.
+
+●
+
+●
+
+r∗
+●
+
+●
+
+Figure 15: The blue shaded regions correspond to Br (ui ), for i = 1, 2, 3, and the purple shaded
+region is the smallest enclosing ball of the points. The statements r∗ < r and Br (u1 ) ∩ Br (u2 ) ∩
+Br (u3 ) 6= ∅ are equivalent.
+To compute the smallest enclosing ball we can rely on the the miniball algorithm , which may
+be also be referred to as the minidisk algorithm [Section 4.7](Berg et al., 2008). Details of this
+are given in Algorithm 7 and we refer the interested reader to (Edelsbrunner and Harer, 2010,
+Section 3.2) for the intuition behind this. An alternative description of this algorithm can be
+found in (Berg et al., 2008, Section 4.7), and for efficient implementation of the Čech complex
+we rely on the GUDHI C++ library (The GUDHI Project, 2021).
+
+E.2
+
+Evaluating L(U , r, ψ 1 , ψ 0 ; hN,K )
+
+The likelihood given in (12) requires the enumeration of hyperedge discrepancies between the
+observed hypergraph hN,K and the induced hypergraph gN,K (U , r). In this section we note that
+this does not require a summation over all possible hyperedges, and so can be computed far more
+efficiently than (11) suggests. We first discuss evaluation of (12), and then observe that (9) can
+be evaluated in a similar way.
+To evaluate the likelihood we have the hyperedges present in hN,K and the hyperedges present
+in gN,K (U , r). In practice, as the data examples from Section 7 suggest, the number of hyperedges in each of these hypergraphs is much smaller than the number of possible hyperedges
+PK N 
+(h)
+(g)
+k=2 k . Let nk and nk denote the number of order k hyperedges in hN,K and gN,K (U , r),
+respectively. To evaluate the likelihood, we first enumerate the number of order k hyperedges
+(11)
+which are present in both hypergraphs to obtain dk (gN,K (U , r), hN,K ). This can easily be computed by evaluating the number of intersection between the hyperedges in hN,K and gN,K (U , r).
+
+34
+
+Algorithm 7 Miniball
+1) Set σ1 = ek and σ2 = ∅
+2) if σ1 = ∅, compute the miniball B of σ2
+else choose u ∈ σ1
+-Calculate the miniball B which contains the points σ1 \ u in its interior and the
+points σ2 on its boundary
+-if u ∈
+/ B, then set B to be the miniball B which contains the points σ1 \ u
+in its interior and the points σ2 ∪ u on its boundary
+Then, for k = 2, 3, . . . , K, we have
+(10)
+
+dk
+
+(g)
+
+(11)
+
+(gN,K (U , r), hN,K ) = nk − dk
+
+(gN,K (U , r), hN,K ),
+
+(53)
+
+(01)
+(h)
+(11)
+dk (gN,K (U , r), hN,K ) = nk − dk (gN,K (U , r), hN,K ),
+
+(54)
+
+  h
+N
+(00)
+(11)
+dk (gN,K (U , r), hN,K ) =
+− dk (gN,K (U , r), hN,K )
+k
+(10)
+
++dk
+
+(01)
+
+(gN,K (U , r), hN,K ) + dk
+
+i
+(gN,K (U , r), hN,K ) .
+
+(55)
+
+Hence, we are able to avoid summation over all possible hyperedges. We can easily calculate
+the distance specified in (8) from the above, by observing that it is given by the sum of (53) and
+(54).
+
+F
+
+Theoretical results in Section 4
+
+F.1
+
+Proofs for Section 4.1
+
+Theorem 4.1. This follows immediately from (Rastelli et al., 2016, Theorem 1).
+Proposition 4.1. Since a hyperedges can form due to the geometric or noise component of our
+model, it immediately follows that
+ ∗
+
+
+
+(g )
+(g)
+p{i,j} y{i,j} = 1|ui , r2 , ϕ2 , µ, Σ = p y{i,j} = 1|ui , r2 , , µ, Σ (1 − ϕ2 )
+
+
+
+(g)
++ 1 − p y{i,j} = 1|ui , r2 , , µ, Σ ϕ2 ,
+(56)
+(g)
+
+where p(y{i,j} = 1|ui , r2 , µ, Σ) denotes the probability of the hyperedge e2 = {i, j} being present
+in g(U , r), where node i is positioned at ui .
+Recall that the hyperedge {i, j} occurs in g(U , r) if Br2 (ui ) ∩ Br2 (uj ) 6= ∅. Given ui , this
+can equivalently be expressed as p(kUj − ui k ≤ 2r2 |ui , r2 , µ, Σ) where Uj ∼ N (µ, Σ). Therefore
+we require an expression for
+
+pi (ye(g)
+= 1|ui , r2 , µ, Σ) = p(kUj∗ k ≤ 2r2 ) = p (Uj∗ )T Uj∗ ≤ 4r22 ,
+(57)
+2
+where Uj∗ ∼ N (µ − ui , Σ).
+Since we assume Σ is diagonal, we may write
+(Uj∗ )T Uj∗ =
+
+d
+X
+
+∗ 2
+(Uj,l
+) ,
+
+l=1
+
+35
+
+(58)
+
+∗
+where Uj,l
+∼ N ((µ − ui )l , σl2 ) denotes the lth dimension of Uj∗ . We then obtain the distribution
+∗ 2
+of (Uj,l
+) by noting
+
+
+
+∗
+Uj,l
+σl
+
+2
+
+∼ χ21,((µ−ui )l /σl )2
+
+∗
+Uj,l
+
+⇒
+
+2
+
+∼ σl2 χ21,((µ−ui )l /σl )2 .
+
+(59)
+
+Hence, we have
+(Uj∗ )T Uj∗ =
+
+d
+d
+X
+X
+∗ 2
+(Uj,l
+) ∼
+σl2 χ21,((µ−ui )l /σl )2 .
+l=1
+
+(60)
+
+l=1
+
+For general diagonal Σ we can evaluate (57) using the R package CompQuadForm (Duchesne
+and de Micheaux (2010)). We note here that, if σl = σ for l = 1, 2, . . . , d, we can simplify (60)
+to the following
+(Uj∗ )T Uj∗ ∼ σ 2 χ2d,λ ,
+where λ =
+
+(61)
+
+Pd
+
+2
+2
+l=1 (µ − ui )l /σ . This implies that
+
+pi (ye(g)
+= 1|ui , r2 , µ, Σ) = p((Uj∗ )T Uj∗ ≤ 4r22 ) = p(σ 2 Z ≤ 4r22 ) = p(Z ≤ 4r22 /σ 2 ),
+2
+
+(62)
+
+where Z ∼ χ2d,λ .
+
+F.2
+
+Proofs for Section 4.2
+
+Proposition 4.2. Conditional on the latent coordinate ui , we canview the order k degree
+ of the
+(g ∗ )
+th
+i node as a sum of Bernoulli trials with success probability p yek,i = 1|ui , rk , µ, Σ over all
+
+−1
+possible N
+k−1 hyperedges. Note however, that these Bernoulli trials are not dependent since
+there exist combinations of hyperedges containing node i which share additional indices. For
+example, when k = 3, the hyperedges {i, j, l} and {i, j, m} are not independent.
+Writing an exact expression for the order k degree distribution is therefore challenging. To
+address the dependence, we consider a Poisson approximation of the sum of dependent Bernoulli
+trials (discussed, for example, in Teerapabolarn (2014)). The result then follows by extending
+the expression for the order k = 2 degree distribution in Theorem 4.1 and substituting a Poisson
+approximation for the sum of dependent Bernoulli trials.
+Lemma 4.1. Firstly, the decomposition
+
+
+
+ ∗
+(1 − ϕk )
+=
+1|u
+,
+r
+,
+µ,
+Σ
+p ye(gk,i) = 1|ui , rk , ϕk , µ, Σ = p ye(g)
+i k
+k,i
+
+
+
+=
+1|u
+,
+r
+,
+µ,
+Σ
+ϕk
++ 1 − p ye(g)
+i
+k
+k,i
+
+(63)
+
+follows immediately given the explanation in Proof F.1. Additionally, we note that, since Uj ∼
+N (µ, Σ) and Σ = diag(σ12 , σ22 , . . . , σd2 ), we have (Uj )l ∼ N (µl , σl2 ) where subscript l refers to the
+lth dimension, for l = 1,2, . . . , d.
+
+(g)
+We approximate p yek,i = 1|ui , rk , µ, Σ by considering the probability that coordinates
+{uj }j∈ek,i fall within a square of side length sk , denoted as Ssk , instead of a ball of radius
+36
+
+1.0
+0.6
+
+probability
+
+0.8
+
+k=2 theory
+k=2 MC
+k= 3 theory
+k= 3 MC
+k= 4 theory
+k= 4 MC
+
+0.0
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+k=2 theory
+k=2 MC
+k= 3 theory
+k= 3 MC
+k= 4 theory
+k= 4 MC
+
+0.2
+
+probability
+
+ui=(2,2)
+
+0.4
+
+1.0
+
+ui=(0,0)
+
+0.0
+
+0.5
+
+1.0
+
+1.5
+
+2.0
+
+0.0
+
+r
+
+0.5
+
+1.0
+
+1.5
+
+2.0
+
+r
+
+(g)
+
+Figure 16: Comparison of theoretical (solid) and Monte Carlo (dashed) estimates of p(yek,i =
+1|ui , rk , µ, Σ) for varying rk . We take Σ = diag(1, 2), µ = (0, 0) and consider connection probabilities for k = 2, 3, 4. In the left plot ui = µ and in the right plot ui = (1, 2).
+rk . This greatly simplifies the region of integration and allows us to consider the integral independently for each dimension.
+We choose sk so that Ssk has area equal to that of a ball of radius
+√
+rk , and this gives sk = πrk .
+
+Our goal is to evaluate the expression p {uj }j∈ek,i ∈ Ssk |ui , rk , µ, Σ , and we first note that
+d
+ Y
+p {uj }j∈ek,i ∈ Ssk |ui , rk , µ, Σ =
+p (Rl ≤ sk |uil , rk , µ, Σ) ,
+
+(64)
+
+l=1
+
+where uil is the lth element of ui and Rl denotes the range of {ujl }j∈ek,i .
+To evaluate this, we rely on well-known results from order statistics (David and Nagaraja,
+2004). In particular, let X1 , X2 , . . . , Xm be independent but non-identically distributed, where
+Xj has pdf fj (x) and cdf Fj (x). Then, it is well known that
+F (t) =
+
+M Z
+X
+
+fj (x)
+
+j=1
+
+Y
+
+[Fv (x + t) − Fv (x)] dx
+
+(65)
+
+v6=j
+
+is the cdf of the range of X1 , X2 , . . . , Xm . By applying this result to our setting and noting that
+the ith node has a fixed value, we obtain the result.
+
+F.3
+
+Additional figures
+
+Figure 16 evaluates the approximation for the intersection probabilities when Σ = diag(1, 2).
+Figure 17 evaluates the Poisson approximation for the order k = 3 degree distribution when
+N = 10 and Σ = diag(1, 2). Figure 18 evaluates the Poisson approximation for the order k = 3
+degree distribution when N = 20 and Σ = diag(1, 1).
+
+G
+
+Alternative hypergraph models
+
+G.1
+
+Stasi et al. (2014) model
+
+In this model each node in the hypergraph is assigned a parameter which controls its tendency
+to form edges, and we denote this parameter by βi , for i = 1, 2, . . . , N . Let yek = 1 denote the
+
+37
+
+probability
+
+0.6
+
+0.8
+
+r= 0.1 theory
+r= 0.1 MC
+r= 0.5 theory
+r= 0.5 MC
+r= 1 theory
+r= 1 MC
+
+0.2
+0.0
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+r= 0.1 theory
+r= 0.1 MC
+r= 0.5 theory
+r= 0.5 MC
+r= 1 theory
+r= 1 MC
+
+0.4
+
+probability
+
+1.0
+
+ui=(2,2)
+
+1.0
+
+ui=(0,0)
+
+0
+
+5
+
+10
+
+15
+
+20
+
+25
+
+30
+
+35
+
+0
+
+5
+
+10
+
+degree
+
+15
+
+20
+
+25
+
+30
+
+35
+
+degree
+
+Figure 17: Comparison between empirical (dashed line) and Poisson approximation (points) of
+the order k = 3 degree distribution. We take N = 10, µ = (0, 0), Σ = diag(1, 2) and evaluate
+the distribution for r3 ∈ (0.1, 0.4, 1.0). The left plot shows ui = µ and the right plot shows
+ui = (1, 2).
+1.0
+
+ui=(1.5,1.5)
+
+1.0
+
+ui=(0,0)
+
+0.2
+
+0.4
+
+probability
+
+0.6
+
+0.8
+
+r= 0.1 theory
+r= 0.1 MC
+r= 0.5 theory
+r= 0.5 MC
+r= 1 theory
+r= 1 MC
+
+0.0
+
+0.0
+
+0.2
+
+0.4
+
+probability
+
+0.6
+
+0.8
+
+r= 0.1 theory
+r= 0.1 MC
+r= 0.5 theory
+r= 0.5 MC
+r= 1 theory
+r= 1 MC
+
+0
+
+50
+
+100
+
+150
+
+0
+
+degree
+
+50
+
+100
+
+150
+
+degree
+
+Figure 18: Comparison between empirical (dashed line) and Poisson approximation (points) of
+the order k = 3 degree distribution conditional on the latent coordinate ui . We take N = 20, µ =
+(0, 0), Σ = diag(1, 1) and evaluate the distribution for r3 ∈ (0.1, 0.4, 1.0). The left plot shows
+ui = µ and the right plot shows ui = (1, 2).
+presence of the hyperedge ek = {i1 , i2 , . . . , ik } ⊆ {1, 2, . . . , N } for k ≥ 2. The probability of the
+hyperedge ek occurring is then given by
+p(yi1 i2 ...ik = 1) =
+
+exp{βi1 + βi2 + . . . βik }
+.
+1 + exp{βi1 + βi2 + . . . βik }
+
+(66)
+
+Since the hyperedges are assumed to occur independently conditional on β = (β1 , β2 , . . . , βN ), the
+likelihood is obtained by taking the product of Bernoulli likelihoods over all possible hyperedges
+EN,K . This likelihood can be shown to belong to the exponential family. Stasi et al. (2014)
+introduce several variants of this model, but we only consider the above model for the study in
+Section 6.1.
+
+G.2
+
+Ng and Murphy (2021) model
+
+The model introduced by Ng and Murphy (2021) assumes that hyperedges can be clustered
+according to their topic and size. In this context, the topic clustering implies that the hyperedges
+can be partitioned into latent classes and the probability of a node belonging to a hyperedge
+depends on its latent class. As an example, consider a coauthorship network where papers are
+38
+
+represented as hyperedges. We may classify papers according to their academic discipline and
+impose that certain authors are more likely to contribute to papers within different disciplines.
+The size clustering is with respect to the hyperedge order, and this allows the model to capture
+variation in the size of hyperedges. To specify this model, we assume T topic clusters and S
+size clusters. It is assumed that the ith node belongs to a hyperedge with size label s and
+topic label t with probability αs φit , so that α = (α1 , α2 , . . . , αS ) controls the size clusters and
+φ = {φit }i=1,2,...,N,t=1,2,...,T controls the topic clusters. Additionally, we let π = (π1 , π2 , . . . , πT )
+and τ = (τ1 , τ2 , . . . , τS ) denote the prior topic and size assignment probabilities, respectively. To
+write down the likelihood, we let xij = 1 indicate that the ith node belongs to the j th hyperedge,
+(1)
+(2)
+zjt = 1 indicate that the j th hyperedge has topic label t, and zjs = 1 indicate that the j th
+hyperedge has size label s. The likelihood is then given by
+
+L(x, z (1) , z (2) ; θ) =
+
+M
+Y T
+Y S
+Y
+
+"
+πt τs
+
+j=1 t=1 s=1
+
+N
+Y
+
+(1) (2)
+#zjt
+zjs
+
+(αs φit )xij (1 − αs φit )1−xij
+
+.
+
+(67)
+
+i=1
+
+Finally, to ensure the model is identifiable, we set αS = 1. Ng and Murphy (2021) also introduce
+a version of this model which only assumes a topic clustering, but we do not use this for our
+study in Section 6.1.
+
+H
+
+Simulation set-up for Section 6.1
+
+The model parameters for the cases described in Table 1 in Section 6.1 are provided in Table 2.
+
+I
+
+Assessing Model Fit
+
+We provide a visualisation of the simulated data example used in Section 6.2 in Figure 19 and a
+summary of the MCMC output in Figure 20.
+
+J
+
+Details for Scalability study
+
+For the study presented in Section 6.3, we simulate data under regimes (R1) and (R2) from
+the generative model outlined in Algorithm 1 with N approximately equal to (10, 30, 50, 100),
+d = 2 and K = 3. To control the density between these regimes we vary r and Σ and details of
+the specific parameters are given in Table 3. Note that the simulated examples do not exactly
+specify N , but instead allow hypergraphs whose largest connected component is close to N to
+avoid situations in which the simulated data contain isolated nodes or components. For each
+case, we simulate 10 hypergraphs and Figure 21 shows the density for each example as a function
+of N . As expected, we see that (R1) corresponds to sparser hypergraphs than (R2).
+
+K
+
+Model Misspecification
+
+Here we consider the robustness of our modelling approach under different cases of misspecification, and this allows us to assess the suitability of our model for a range of hypergraph data which
+do not satisfy our modelling assumptions. Table 4 summarises the types of misspecification we
+consider, where we focus on different assumptions on U and r. We note that alternative cases of
+misspecification would be interesting to explore, such as node specific radii or non-homogeneous
+39
+
+Model
+Stasi et al. (2014)
+
+Case
+1
+2
+1
+2
+
+Ng and Murphy
+(2021)
+
+3
+4
+1
+2
+
+LSH
+
+2
+2
+2
+
+Parameters
+βi = −1.4 for i = 1, 2, . . . , N
+β = (−0.5, −0.53, . . . , −1.97, −2)
+G = K = 1, a = 1, φi1 = 0.075, π = 1, τ = 1
+G = 3, K = 1, a = 1, φi1 = 0.25 for i ∈ A, φi2 = 0.25 for
+i ∈ B, φi3 = 0.25 for i ∈ C, π = (1/3, 1/3, 1/3), τ = 1
+G = 1, K = 3, a = (0.2, 0.5, 1),
+φi1 = 0.15, π = 1, τ = (1/3, 1/3, 1/3)
+G = 2, K = 3, a = (0.4, 1), φi1 = 0.3 for i ∈ A, φi2 = 0.3
+for i ∈ B, φi1 = φi2 = 0.2 for i ∈ C, π = (1/2, 1/2), τ =
+(1/3, 1/3, 1/3)
+1 0.9 ),
+r = (0.18, 0.3, 0.35), µ = (0, 0), Σ = 0.25 ( 0.9
+1
+ψ0 = (0.01, 0.01, 0.01), ψ1 = (0.01, 0.01, 0.01)
+r = (0.18, 0.3, 0.35), µ = (0, 0), Σ = 0.25 ( 10 01 ) ,
+ψ0 = (0.01, 0.01, 0.01), ψ1 = (0.01, 0.01, 0.01)
+r = (0.2, 0.3, 0.35), µ = (0, 0), Σ = 0.25 ( 10 01 ) ,
+ψ0 = (0.01, 0.01, 0.01), ψ1 = (0.01, 0.5, 0.01)
+r = (0.1, 0.35, 0.4), µ = (0, 0), Σ = 0.25 ( 10 01 ) ,
+ψ0 = (0.01, 0.01, 0.01), ψ1 = (0.01, 0.01, 0.01)
+1 0 0
+r = (0.18, 0.3, 0.35), µ = (0, 0), Σ = 0.25 0 1 0 ,
+001
+ψ0 = (0.01, 0.01, 0.01), ψ1 = (0.01, 0.01, 0.01)
+
+Table 2: Cases for each hypergraph model considered in the model depth comparison study. The
+case numbers correspond to the labels in Figures 7a, 7b and 7c, and are described in Table 1.
+Throughout we take N = 50 and, where appropriate, K = 4.
+
+errors, however simulating data for reasonable N with these assumptions requires significant
+computational cost.
+For each of the 8 cases described in Table 4, we simulate a hypergraph with N = 50 and
+K = 3 and fit our model. Then, we examine the predictive distributions and compare these to
+the truth by inspecting 1) the degree distribution, 2) the number of occurrences of the motifs
+depicted in Figures 6b3, 6a3, 6a4 and 6a5, 3) the density of order 3 hyperedges and 4) the number
+of clusters in the latent representation, as obtained by the gap statistic of a k-means clustering
+using the cluster package in R (Maechler et al., 2019).
+The results of our study are presented in Figure 22, where the ith row corresponds to the
+th
+i case detailed in Table 4. We generally observe a close correspondence between the truth and
+predictive distributions, however we see an overall poorer performance when the distribution of
+the latent coordinates differs. It is interesting to note that, although there is generally a good fit
+in terms of the degree distribution, we see many of the motifs are over or under predicted by the
+posterior predictives. This reflects the constraints implied by the latent representation. Finally,
+we note that there is occasional disagreement in the number of clusters of the latent coordinates.
+From this study it is clear that our model imposes certain properties on the predictive distributions and it is important to verify whether or not these are appropriate for a specific data
+example.
+
+40
+
+Figure 19: Visualisation of simulated data with N = 50, K = 3, r = (0.35, 0.45), ϕ0 = ϕ1 =
+(0.001, 0.001), µ = (0, 0) and Σ = I2 .
+
+(R1)
+
+(R2)
+
+approximate N
+10
+30
+50
+100
+10
+30
+50
+100
+
+r
+(0.75, 0.85)
+(0.75, 0.85)
+(0.75, 0.85)
+(0.75, 0.85)
+(1.4, 1.5)
+(1.4, 1.5)
+(1.4, 1.5)
+(1.4, 1.5)
+
+µ
+(0,0)
+(0,0)
+(0,0)
+(0,0)
+(0,0)
+(0,0)
+(0,0)
+(0,0)
+
+Σ
+2I2
+2.5I2
+3I2
+4.5I2
+2I2
+2.5I2
+3I2
+4.5I2
+
+ϕ
+(0.001, 0.001)
+(0.001, 0.001)
+(0.001, 0.001)
+(0.001, 0.001)
+(0.001, 0.001)
+(0.001, 0.001)
+(0.001, 0.001)
+(0.001, 0.001)
+
+Table 3: Summary of parameter values for simulating data according to (R1) and (R2).
+
+L
+
+Real Data Example Plots
+
+MCMC traceplots for the grocery and coauthorship dataset are given in Figures 23a, 24a and
+23b, 24b, respectively.
+
+41
+
+(a) Left: posterior samples of U , Right: posterior mean of latent coordinates and observed hyperedges.
+
+(b) Top, left to right: traceplots of L, ϕ0 , ϕ1 , µ. Bottom, left to right: traceplots of Σ1,1 , Σ2,2 , Σ1,2
+and r, where Σi,j denotes the (i, j)th entry of Σ. Where appropriate, k = 2 and k = 3 parameters are
+plotted in black and red, respectively.
+
+Figure 20: Summary of MCMC output for simulated data with N = 50 and K = 3, as shown in
+Figure 19.
+
+42
+
+●
+●●
+●
+●
+●
+●●
+●
+
+●
+
+●
+●
+●●
+●●●
+●
+
+●
+●
+●
+●●
+●
+
+20
+
+40
+
+60
+
+80
+
+0.8
+0.6
+0.4
+
+●●
+●●
+●
+
+●
+●
+
+●
+
+●
+●
+●
+
+●
+●●
+●
+●
+●
+●
+
+●
+●
+●
+
+●
+●
+●
+●●
+●
+●
+
+0.2
+
+0.2
+
+0.4
+
+●
+
+●
+
+0.0
+
+●
+
+Density of k=2 hyperedges
+
+0.6
+
+0.8
+
+(R2)
+
+0.0
+
+Density of k=2 hyperedges
+
+(R1)
+
+100
+
+10
+
+20
+
+30
+
+N
+
+N
+
+(R1)
+
+(R2)
+
+40
+
+50
+
+20
+
+●
+●
+●●●
+●●●
+
+40
+
+●●
+●●
+
+60
+
+80
+
+100
+
+0.6
+
+●
+
+0.4
+
+●
+
+●
+
+0.2
+
+●
+●●
+●
+●
+●
+●●
+●●
+
+●●
+●
+●
+●●
+●
+
+●
+●
+
+●
+●
+●
+●
+●
+●●
+●
+
+●
+●
+●
+●
+●●
+●
+
+●
+●
+●●
+●
+
+0.0
+
+●
+
+Density of k=3 hyperedges
+
+0.6
+0.4
+0.2
+
+●
+
+0.0
+
+Density of k=3 hyperedges
+
+●
+
+10
+
+20
+
+N
+
+30
+
+40
+
+50
+
+N
+
+Figure 21: Density of simulated examples under regimes (R1) and (R2). Data were simulated from the generative model outlined in Algorithm 1 with N approximately equal to
+(10, 30, 50, 100). (R1) and (R2) are controlled to be sparser and denser, respectively, and details
+of the parameters are given in Table 3. The top row shows the density for order 2 hyperedges
+and the bottom row shows the density for order 3 hyperedges.
+
+Index
+1
+2
+3
+4
+5
+6
+7
+8
+
+U misspecification
+None
+PC
+ui ∼ c=1 λc N (µc , Σc ), C = 2 and distinct clusters
+PC
+ui ∼ c=1 λc N (µc , Σc ), C = 2 and fuzzy clusters
+ui sampled from a homogeneous Poisson point process
+None
+PC
+ui ∼ c=1 λc N (µc , Σc ), C = 2 and distinct clusters
+PC
+ui ∼ c=1 λc N (µc , Σc ), C = 2 and fuzzy clusters
+ui sampled from a homogeneous Poisson point process
+Table 4: Types of misspecification.
+
+43
+
+r misspecification
+None
+None
+None
+None
+Simplicial: rk = rk−1
+Simplicial: rk = rk−1
+Simplicial: rk = rk−1
+Simplicial: rk = rk−1
+
+Figure 22: Summary of misspecification simulation study. Left to right: average degree distribution, number of triangles (Figure 6b3, number of Figure 6a3, number of Figure 6a4, number
+of Figure 6a5, density of order 3 hyperedges and number of clusters in latent representation.
+Each row corresponds to the misspecification cases summarised in Table 4. The y axes and x
+axes show the quantiles of the posterior and prior predictives, respectively, and the red lines
+correspond to the line y = x.
+
+44
+
+(a) Grocery example from Section 7.1.
+
+(b) Coauthorship example from Section 7.2.
+
+Figure 23: MCMC post-burn-in traceplots for all parameters except the latent positions for the
+Grocery and coauthorship data examples. For each figure we have: Top, left to right: loglikelihood, ϕ(0) , ϕ(1) and µ. Bottom, left to right: Σ1,1 , Σ2,2 , Σ1,2 and r, where Σi,j indicates
+the {i, j}th entry of Σ.
+
+45
+
+(a) Grocery example from Section 7.1.
+
+(b) Coauthorship example from Section 7.2.
+
+Figure 24: MCMC post-burn-in latent position U traceplots for the grocery and coauthorship
+dataset examples.
+
+46
+
+

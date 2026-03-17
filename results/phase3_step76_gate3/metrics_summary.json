@@ -1,0 +1,12 @@
+{
+  "status": "blocked_by_data",
+  "decision": "Cannot close Gate 3 until real dataset preflight and downstream motif/prediction pipeline are ready.",
+  "upstream_statuses": {
+    "step70": "blocked_missing_window_files",
+    "step71": "blocked_missing_step70_artifacts",
+    "step72": "blocked_upstream_not_ready",
+    "step73": "blocked_missing_step70_outputs",
+    "step74": "blocked_missing_dataset_root",
+    "step75": "blocked_missing_step70_artifacts"
+  }
+}

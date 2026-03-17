@@ -1,0 +1,47 @@
+{
+  "checks": {
+    "tracker_consistency": {
+      "passed": true,
+      "issues": []
+    },
+    "claim_registry_evidence": {
+      "passed": true,
+      "checked_paths": [
+        "results/phase0/metrics_summary.json",
+        "tests/test_phase0_steps.py",
+        "tracking/phase0_steps.csv",
+        "tests/test_phase0_steps.py",
+        "results/phase0/metrics_summary.json",
+        "results/phase0_switching_sweep/sweep_metrics.json",
+        "docs/novelty_landscape_2026_03_12.md",
+        "results/rigor_checks/metrics_summary.json",
+        "results/rigor_checks/schema_logic_audit.json",
+        "tests/test_phase0_steps.py",
+        "tests/test_phase0_steps.py",
+        "docs/assumption_literature_matrix.csv",
+        "docs/assumption_validity_literature_check_2026_03_12.md",
+        "docs/phase1_assumption_literature_summaries_round2.md",
+        "code/models/assumption_literature_audit.py",
+        "results/rigor_checks/assumption_literature_audit.json"
+      ],
+      "missing_paths": []
+    },
+    "formula_audit": {
+      "passed": true,
+      "missing_phrases": []
+    },
+    "observability_claim_alignment": {
+      "passed": true,
+      "issues": []
+    },
+    "biological_realism_proxy": {
+      "passed": true,
+      "missing_tokens": []
+    },
+    "assumption_literature_gate": {
+      "passed": true,
+      "issues": []
+    }
+  },
+  "all_passed": true
+}

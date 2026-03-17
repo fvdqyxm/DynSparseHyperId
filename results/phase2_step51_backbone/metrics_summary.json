@@ -1,0 +1,20 @@
+{
+  "seed": 701,
+  "batch_size": 4,
+  "time_steps": 120,
+  "input_dim": 20,
+  "hidden_dim": 64,
+  "num_layers": 2,
+  "num_regimes": 3,
+  "logits_shape": [
+    4,
+    120,
+    3
+  ],
+  "probs_shape": [
+    4,
+    120,
+    3
+  ],
+  "probability_simplex_max_deviation": 1.1920928955078125e-07
+}

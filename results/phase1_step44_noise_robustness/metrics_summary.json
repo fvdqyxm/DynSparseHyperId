@@ -1,0 +1,110 @@
+{
+  "config": {
+    "n": 10,
+    "t": 1400,
+    "sparsity": 0.1,
+    "sigma": 0.5,
+    "obs_noise": 0.15,
+    "seeds": [
+      201,
+      202,
+      203
+    ],
+    "student_df": 3.0,
+    "outlier_prob": 0.02,
+    "outlier_scale": 6.0
+  },
+  "summary_by_noise_model": {
+    "gaussian": {
+      "runs": 3.0,
+      "support_f1_mean": 0.8892957969636736,
+      "support_f1_std": 0.06589297583863087,
+      "regime_acc_mean": 0.8660948296402192,
+      "regime_acc_std": 0.03707918401196493
+    },
+    "student_t": {
+      "runs": 3.0,
+      "support_f1_mean": 0.8210613308064582,
+      "support_f1_std": 0.11988693112390932,
+      "regime_acc_mean": 0.8179652132475578,
+      "regime_acc_std": 0.053050320500003925
+    },
+    "contaminated": {
+      "runs": 3.0,
+      "support_f1_mean": 0.8285376932116063,
+      "support_f1_std": 0.0726257553078256,
+      "regime_acc_mean": 0.8108172504169645,
+      "regime_acc_std": 0.048199158529588
+    }
+  },
+  "degradation_vs_gaussian": {
+    "gaussian": {
+      "support_f1_drop_vs_gaussian": 0.0,
+      "regime_acc_drop_vs_gaussian": 0.0
+    },
+    "student_t": {
+      "support_f1_drop_vs_gaussian": 0.0682344661572154,
+      "regime_acc_drop_vs_gaussian": 0.048129616392661445
+    },
+    "contaminated": {
+      "support_f1_drop_vs_gaussian": 0.06075810375206725,
+      "regime_acc_drop_vs_gaussian": 0.055277579223254714
+    }
+  },
+  "runs": [
+    {
+      "model": "gaussian",
+      "seed": 201,
+      "support_f1_mean": 0.9761904761904762,
+      "regime_accuracy": 0.8677626876340243
+    },
+    {
+      "model": "gaussian",
+      "seed": 202,
+      "support_f1_mean": 0.875,
+      "regime_accuracy": 0.8198713366690493
+    },
+    {
+      "model": "gaussian",
+      "seed": 203,
+      "support_f1_mean": 0.8166969147005445,
+      "regime_accuracy": 0.910650464617584
+    },
+    {
+      "model": "student_t",
+      "seed": 201,
+      "support_f1_mean": 0.9328063241106719,
+      "regime_accuracy": 0.8892065761258041
+    },
+    {
+      "model": "student_t",
+      "seed": 202,
+      "support_f1_mean": 0.6547619047619048,
+      "regime_accuracy": 0.7619728377412437
+    },
+    {
+      "model": "student_t",
+      "seed": 203,
+      "support_f1_mean": 0.875615763546798,
+      "regime_accuracy": 0.8027162258756254
+    },
+    {
+      "model": "contaminated",
+      "seed": 201,
+      "support_f1_mean": 0.7286036036036037,
+      "regime_accuracy": 0.7533952823445318
+    },
+    {
+      "model": "contaminated",
+      "seed": 202,
+      "support_f1_mean": 0.8990384615384617,
+      "regime_accuracy": 0.8713366690493209
+    },
+    {
+      "model": "contaminated",
+      "seed": 203,
+      "support_f1_mean": 0.8579710144927536,
+      "regime_accuracy": 0.8077197998570408
+    }
+  ]
+}

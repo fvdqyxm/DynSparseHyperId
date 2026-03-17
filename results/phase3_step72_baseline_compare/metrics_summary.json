@@ -1,0 +1,8 @@
+{
+  "status": "blocked_upstream_not_ready",
+  "step70_status": "blocked_missing_window_files",
+  "step71_status": "blocked_missing_step70_artifacts",
+  "issues": [
+    "Step70/71 must both be ready before baseline comparison."
+  ]
+}

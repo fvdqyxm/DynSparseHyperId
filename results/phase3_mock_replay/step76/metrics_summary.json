@@ -1,0 +1,12 @@
+{
+  "status": "provisional_pass",
+  "decision": "Pipeline artifacts present; biological plausibility narrative can be drafted provisionally.",
+  "upstream_statuses": {
+    "step70": "ok",
+    "step71": "ok",
+    "step72": "ok",
+    "step73": "ok",
+    "step74": "ready",
+    "step75": "ok"
+  }
+}

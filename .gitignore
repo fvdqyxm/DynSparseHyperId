@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Local caches/logs
+.cache/
+.mplconfig/
+.nvimlog
+
+# OS/editor noise
+.DS_Store

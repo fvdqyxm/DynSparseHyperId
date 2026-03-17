@@ -1,0 +1,12 @@
+{
+  "bids_root": "data/real/mock_marijuana_323",
+  "atlas": "Yeo17",
+  "label_file": "data/real/mock_marijuana_323/phenotypes/craving_labels.csv",
+  "status": "ready_for_step69",
+  "issues": [],
+  "n_subjects": 8,
+  "n_with_bold": 8,
+  "n_with_confounds": 8,
+  "n_with_atlas_timeseries": 8,
+  "manifest_path": "results/phase3_mock_replay/step68/subject_manifest.csv"
+}

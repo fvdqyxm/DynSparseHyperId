@@ -1,0 +1,59 @@
+{
+  "config": {
+    "n_values": [
+      20
+    ],
+    "k_values": [
+      3,
+      4
+    ],
+    "t_values": [
+      300
+    ],
+    "sigma_values": [
+      0.2
+    ],
+    "seeds": [
+      901
+    ],
+    "max_runs": 0,
+    "max_features_khigh": 400,
+    "max_targets_khigh": 12,
+    "cv_complexity_limit": 10000,
+    "alpha_scale_khigh": 0.35
+  },
+  "requested_total": 2,
+  "executed": 2,
+  "skipped": 0,
+  "runs": [
+    {
+      "n": 20,
+      "k": 3,
+      "t": 300,
+      "sigma": 0.2,
+      "seed": 901,
+      "num_features": 190,
+      "evaluated_targets": 12,
+      "solver": "lasso_scaled",
+      "support_f1": 0.7300970873781742,
+      "precision": 0.9999999999999947,
+      "recall": 0.5749235474006098,
+      "status": "ok"
+    },
+    {
+      "n": 20,
+      "k": 4,
+      "t": 300,
+      "sigma": 0.2,
+      "seed": 901,
+      "num_features": 400,
+      "evaluated_targets": 12,
+      "solver": "lasso_scaled",
+      "support_f1": 0.48963474827208026,
+      "precision": 0.9725490196078393,
+      "recall": 0.3271767810026381,
+      "status": "ok"
+    }
+  ],
+  "skipped_runs": []
+}

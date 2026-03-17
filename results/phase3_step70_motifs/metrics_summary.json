@@ -1,0 +1,7 @@
+{
+  "status": "blocked_missing_window_files",
+  "windows_dir": "results/phase3_step69_windows",
+  "issues": [
+    "No window files found under results/phase3_step69_windows"
+  ]
+}

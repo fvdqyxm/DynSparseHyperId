@@ -1,0 +1,9 @@
+{
+  "bids_root": "data/real/marijuana_323",
+  "atlas": "Yeo17",
+  "label_file": "data/real/marijuana_323/phenotypes/craving_labels.csv",
+  "status": "blocked_missing_data_root",
+  "issues": [
+    "BIDS root not found: data/real/marijuana_323"
+  ]
+}

@@ -1,0 +1,65 @@
+Step #,Description,Status,Date Completed,Notes/Results,Contingency Triggered? (Y/N + details)
+77,Write introduction motivation section,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+78,Write problem statement and scope section,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+79,Write contribution bullets and claim boundaries,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+80,Integrate cross-domain motivation examples,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+81,Related work: sparse graphical models,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+82,Related work: hypergraph learning models,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+83,Related work: switching dynamical systems,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+84,Related work: identifiability and sample complexity,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+85,Related work: sparse inverse problems,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+86,Write explicit novelty-vs-prior gap paragraph,Completed,2026-03-12,Drafted in docs/phase4_steps77_90_intro_related.md,N
+87,Harmonize notation across intro/theory/algorithm,Completed,2026-03-12,Notation harmonized after Phase1 reframed-theory closure and synced across draft docs + master.tex,N
+88,Figure-story linkage for intro and contributions,Completed,2026-03-12,Figure-to-claim map completed in docs/phase4_step88_figure_story_map.md with claim-safe linkage including negative-result panels,N
+89,Abstract polishing for submission styles,Completed,2026-03-12,Prepared abstract variants for multiple venue lengths in docs/phase4_step89_abstract_styles.md,N
+90,Finalize intro+related integrated draft,Completed,2026-03-12,Intro/related section finalized under reframed claim-safe theory scope (docs/phase4_steps77_90_intro_related.md),N
+91,Write formal model section in paper style,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+92,Write assumptions section with interpretation,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+93,Write identifiability theorem statement section,Completed,2026-03-12,Identifiability theorem statement finalized for restricted class and synchronized with master.tex,N
+94,Write identifiability proof roadmap section,Completed,2026-03-12,Proof roadmap finalized with lemma dependency chain and explicit symmetry qualifiers,N
+95,Write sample complexity theorem statement section,Completed,2026-03-12,Sample-complexity theorem statement finalized with explicit mixing/separation terms,N
+96,Write concentration lemmas section,Completed,2026-03-12,Concentration lemma subsection finalized with Bernstein/dependence framing and scope limits,N
+97,Write minimax lower-bound theorem section,Completed,2026-03-12,Minimax lower-bound theorem section finalized at structural scaling level with Fano construction linkage,N
+98,Write minimax proof sketch with packing details,Completed,2026-03-12,Packing-based proof sketch finalized with explicit near-matching discussion to upper bound,N
+99,Write convergence theorem section,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+100,Write nonconvex contingency and claim-safe note,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+101,Add theorem-dependency diagram in text form,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+102,Add assumption-checkability table,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+103,Add theorem limitations and failure assumptions,Completed,2026-03-12,Drafted in docs/phase4_steps91_105_theory_writeup.md,N
+104,Align theorem notation with LaTeX master,Completed,2026-03-12,Theorem notation synchronized with reframed closure statements in proofs/latex/master.tex,N
+105,Finalize theory section draft,Completed,2026-03-12,Theory section finalized for current submission scope with explicit open-boundary statements,N
+106,Write algorithm overview section,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+107,Write encoder architecture subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+108,Write emission model subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+109,Write proximal sparsity step subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+110,Write temporal smoothness subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+111,Write training curriculum subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+112,Write synthetic setup protocol subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+113,Write metrics and evaluation subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+114,Write scaling law results subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+115,Write robustness and ablation subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+116,Write baseline comparison subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+117,Write failure mode analysis subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+118,Write reproducibility and gates subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+119,Write claim boundaries subsection,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+120,Finalize algorithm/synthetic draft,Completed,2026-03-12,Drafted in docs/phase4_steps106_120_algorithm_synth_writeup.md,N
+121,Write neuroscience dataset subsection,Blocked,,Real-data section blocked because required local dataset root is unavailable (Phase3 Step68),Y + external dataset unavailable
+122,Write preprocessing subsection for neuroscience data,Blocked,,Method subsection scaffold exists but full writeup blocked without executed real-data outputs,Y + upstream data dependency
+123,Write motif extraction subsection on real data,Blocked,,Blocked by missing non-blocked Step70 outputs,Y + upstream data dependency
+124,Write craving-link analysis subsection,Blocked,,Blocked by missing non-blocked Step71 outputs,Y + upstream data dependency
+125,Write predictive modeling subsection on real data,Blocked,,Blocked by missing non-blocked Step72 outputs,Y + upstream data dependency
+126,Write neuroscience baseline comparison subsection,Blocked,,Blocked by missing non-blocked Step72 outputs,Y + upstream data dependency
+127,Write neuroscience visualization subsection,Blocked,,Blocked by missing non-blocked Step73 outputs,Y + upstream data dependency
+128,Write cross-dataset subsection (ABCD),Blocked,,Blocked by unavailable local ABCD subset mount,Y + external dataset unavailable
+129,Write neuroscience ablation subsection,Blocked,,Blocked by missing non-blocked Step75 outputs,Y + upstream data dependency
+130,Finalize neuroscience illustration section,Blocked,,Entire neuroscience illustration blocked pending completion of Steps121-129 with real data,Y + external dataset unavailable
+131,Polish LaTeX figures references and compile checks,Completed,2026-03-12,Interim PDF compile pipeline passing in proofs/latex/master.pdf,N
+132,Collect mentor/prof feedback packet,Blocked,,Requires external mentor interaction and response,Y + external dependency
+133,Revise manuscript from mentor feedback,Blocked,,Cannot execute until external mentor/prof feedback is received (Step132),Y + upstream external dependency
+134,Submit primary venue,Blocked,,Requires manual external submission accounts and final author decision,Y + external dependency
+135,Prepare backup submission package,Completed,2026-03-12,Drafted in docs/phase4_step135_backup_submissions.md,N
+136,Open-source release package prep,Completed,2026-03-12,Prepared in docs/phase4_step136_open_source_release.md with repository hygiene files,N
+137,Conference blog/poster draft,Completed,2026-03-12,Drafted in docs/phase4_step137_blog_poster_draft.md,N
+138,Rebuttal playbook draft,Completed,2026-03-12,Drafted in docs/phase4_steps138_140_long_tail_plan.md,N
+139,Next-paper roadmap draft,Completed,2026-03-12,Drafted in docs/phase4_steps138_140_long_tail_plan.md,N
+140,PhD-impact narrative draft,Completed,2026-03-12,Drafted in docs/phase4_steps138_140_long_tail_plan.md,N

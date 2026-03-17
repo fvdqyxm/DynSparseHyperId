@@ -1,0 +1,13 @@
+{
+  "seed": 702,
+  "n_nodes": 20,
+  "in_dim": 16,
+  "hidden_dim": 32,
+  "out_dim": 16,
+  "num_hyperedge_connections": 60,
+  "output_shape": [
+    20,
+    16
+  ],
+  "output_mean_abs": 0.19006559252738953
+}

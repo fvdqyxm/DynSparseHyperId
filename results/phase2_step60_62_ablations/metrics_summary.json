@@ -1,0 +1,47 @@
+{
+  "seed": 1701,
+  "step60_sparsity_ablation": {
+    "rows": [
+      {
+        "k": 3,
+        "sparse_support_f1": 0.8522550544318566,
+        "dense_support_f1": 0.9162995594708663,
+        "sparse_val_mse": 0.13513731434906642,
+        "dense_val_mse": 0.15091596387476808,
+        "mse_gain_dense_minus_sparse": 0.015778649525701655
+      },
+      {
+        "k": 4,
+        "sparse_support_f1": 0.7263092269322052,
+        "dense_support_f1": 0.6108356290169781,
+        "sparse_val_mse": 0.4937024133627179,
+        "dense_val_mse": 2.307223460525764,
+        "mse_gain_dense_minus_sparse": 1.8135210471630463
+      }
+    ]
+  },
+  "step61_regime_ablation": {
+    "switching_regime_accuracy": 0.7641172265904217,
+    "single_regime_accuracy_proxy": 0.5518227305218013,
+    "switching_state_mse": 0.2786956396759016,
+    "single_state_mse": 0.279310460970376,
+    "state_mse_gain_single_minus_switching": 0.0006148212944743769,
+    "switching_support_f1_mean": 0.8210526315789474
+  },
+  "step62_highorder_ablation": {
+    "rows": [
+      {
+        "k_true": 3,
+        "highorder_val_mse": 0.13652777039485944,
+        "pairwise_only_val_mse": 0.6855653140490353,
+        "mse_gain_pair_minus_highorder": 0.5490375436541759
+      },
+      {
+        "k_true": 4,
+        "highorder_val_mse": 0.4656007695376963,
+        "pairwise_only_val_mse": 2.5859438454358843,
+        "mse_gain_pair_minus_highorder": 2.120343075898188
+      }
+    ]
+  }
+}

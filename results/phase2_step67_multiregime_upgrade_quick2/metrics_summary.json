@@ -1,0 +1,186 @@
+{
+  "config": {
+    "n": 10,
+    "k": 3,
+    "t": 800,
+    "sigma": 0.1,
+    "obs_noise": 0.2,
+    "edge_prob": 0.12,
+    "support_threshold": 0.05,
+    "seeds": [
+      5301
+    ],
+    "difficulties": {
+      "easy": {
+        "min_support_diff": 0.24,
+        "min_fro_ratio": 0.9
+      },
+      "medium": {
+        "min_support_diff": 0.18,
+        "min_fro_ratio": 0.75
+      },
+      "hard": {
+        "min_support_diff": 0.15,
+        "min_fro_ratio": 0.6
+      }
+    }
+  },
+  "runs": [
+    {
+      "seed": 5301,
+      "upgraded": false,
+      "init_strategy": "kmeans_delta",
+      "regime_accuracy": 0.35294117647058826,
+      "support_f1_mean": 0.12755181549010441,
+      "support_f1_per_regime": [
+        0.16666666666666669,
+        0.12903225806451613,
+        0.08695652173913045
+      ],
+      "sigma2_hat": 0.05024031897911407,
+      "loglik": 446.3707563356871,
+      "transition_l1": 0.46881776172988704,
+      "difficulty": "easy",
+      "mode": "baseline"
+    },
+    {
+      "seed": 5301,
+      "upgraded": true,
+      "init_strategy": "kmeans_delta",
+      "regime_accuracy": 0.3829787234042553,
+      "support_f1_mean": 0.053418803418803416,
+      "support_f1_per_regime": [
+        0.07692307692307691,
+        0.0,
+        0.08333333333333333
+      ],
+      "sigma2_hat": 0.049453561764996885,
+      "loglik": 441.34584095587894,
+      "transition_l1": 0.34155672308538637,
+      "difficulty": "easy",
+      "mode": "upgraded"
+    },
+    {
+      "seed": 5301,
+      "upgraded": false,
+      "init_strategy": "residual_split",
+      "regime_accuracy": 0.3429286608260325,
+      "support_f1_mean": 0.17016806722689073,
+      "support_f1_per_regime": [
+        0.11764705882352941,
+        0.25,
+        0.14285714285714285
+      ],
+      "sigma2_hat": 0.04909994723299891,
+      "loglik": 537.5201232201065,
+      "transition_l1": 0.39534721185193017,
+      "difficulty": "medium",
+      "mode": "baseline"
+    },
+    {
+      "seed": 5301,
+      "upgraded": true,
+      "init_strategy": "kmeans_delta",
+      "regime_accuracy": 0.3579474342928661,
+      "support_f1_mean": 0.1492753623188406,
+      "support_f1_per_regime": [
+        0.2608695652173913,
+        0.1,
+        0.08695652173913045
+      ],
+      "sigma2_hat": 0.04842531176952953,
+      "loglik": 538.1969901197895,
+      "transition_l1": 0.34910374955593215,
+      "difficulty": "medium",
+      "mode": "upgraded"
+    },
+    {
+      "seed": 5301,
+      "upgraded": false,
+      "init_strategy": "residual_split",
+      "regime_accuracy": 0.3742177722152691,
+      "support_f1_mean": 0.12554112554112554,
+      "support_f1_per_regime": [
+        0.0,
+        0.2857142857142857,
+        0.0909090909090909
+      ],
+      "sigma2_hat": 0.04980807635918006,
+      "loglik": 550.4927448242623,
+      "transition_l1": 0.3790610453022829,
+      "difficulty": "hard",
+      "mode": "baseline"
+    },
+    {
+      "seed": 5301,
+      "upgraded": true,
+      "init_strategy": "kmeans_delta",
+      "regime_accuracy": 0.39173967459324155,
+      "support_f1_mean": 0.06666666666666667,
+      "support_f1_per_regime": [
+        0.19999999999999998,
+        0.0,
+        0.0
+      ],
+      "sigma2_hat": 0.049087443321293785,
+      "loglik": 542.0771443750671,
+      "transition_l1": 0.3276600774227986,
+      "difficulty": "hard",
+      "mode": "upgraded"
+    }
+  ],
+  "summary": {
+    "easy_baseline": {
+      "runs": 1,
+      "regime_accuracy_mean": 0.35294117647058826,
+      "support_f1_mean": 0.12755181549010441,
+      "transition_l1_mean": 0.46881776172988704
+    },
+    "easy_upgraded": {
+      "runs": 1,
+      "regime_accuracy_mean": 0.3829787234042553,
+      "support_f1_mean": 0.053418803418803416,
+      "transition_l1_mean": 0.34155672308538637
+    },
+    "easy_delta": {
+      "regime_accuracy_delta": 0.03003754693366706,
+      "support_f1_delta": -0.07413301207130099,
+      "transition_l1_delta": -0.12726103864450067
+    },
+    "hard_baseline": {
+      "runs": 1,
+      "regime_accuracy_mean": 0.3742177722152691,
+      "support_f1_mean": 0.12554112554112554,
+      "transition_l1_mean": 0.3790610453022829
+    },
+    "hard_upgraded": {
+      "runs": 1,
+      "regime_accuracy_mean": 0.39173967459324155,
+      "support_f1_mean": 0.06666666666666667,
+      "transition_l1_mean": 0.3276600774227986
+    },
+    "hard_delta": {
+      "regime_accuracy_delta": 0.017521902377972465,
+      "support_f1_delta": -0.05887445887445887,
+      "transition_l1_delta": -0.05140096787948428
+    },
+    "medium_baseline": {
+      "runs": 1,
+      "regime_accuracy_mean": 0.3429286608260325,
+      "support_f1_mean": 0.17016806722689073,
+      "transition_l1_mean": 0.39534721185193017
+    },
+    "medium_upgraded": {
+      "runs": 1,
+      "regime_accuracy_mean": 0.3579474342928661,
+      "support_f1_mean": 0.1492753623188406,
+      "transition_l1_mean": 0.34910374955593215
+    },
+    "medium_delta": {
+      "regime_accuracy_delta": 0.015018773466833557,
+      "support_f1_delta": -0.020892704908050147,
+      "transition_l1_delta": -0.04624346229599802
+    }
+  },
+  "logic_note": "Positive delta indicates upgraded method improved baseline on that metric; negative delta indicates no improvement."
+}

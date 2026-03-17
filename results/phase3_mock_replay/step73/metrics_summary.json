@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "n_subjects": 8,
+  "n_motifs": 6,
+  "figures": [
+    "results/phase3_mock_replay/step73/motif_basis_heatmap.png",
+    "results/phase3_mock_replay/step73/motif_scores_lines.png"
+  ]
+}

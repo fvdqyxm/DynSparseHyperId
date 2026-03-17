@@ -1,0 +1,17 @@
+{
+  "mock_root": "data/real/mock_marijuana_323",
+  "mock_abcd_root": "data/real/mock_abcd_sud_subset",
+  "labels": "data/real/mock_marijuana_323/phenotypes/craving_labels.csv",
+  "n_subjects": 8,
+  "status_map": {
+    "step68": "ready_for_step69",
+    "step69": "ready_for_step70",
+    "step70": "ok",
+    "step71": "ok",
+    "step72": "ok",
+    "step73": "ok",
+    "step74": "ready",
+    "step75": "ok",
+    "step76": "provisional_pass"
+  }
+}

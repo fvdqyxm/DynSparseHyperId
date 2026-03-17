@@ -1,0 +1,27 @@
+{
+  "source_metrics": "results/phase2_step58_metrics/metrics_summary.json",
+  "structural_slopes_loglog": {
+    "k2_n20_sigma0.10": -1.9985739616609743,
+    "k2_n20_sigma1.00": -1.9985739616609743,
+    "k3_n20_sigma0.10": -0.2716555308006362,
+    "k3_n20_sigma1.00": -0.47574285102192665,
+    "k4_n20_sigma0.10": -0.6915132507872275,
+    "k4_n20_sigma1.00": -0.6369969774025045,
+    "k2_n80_sigma0.10": 0.5854053864414075,
+    "k2_n80_sigma1.00": -1.3013209718911833,
+    "k3_n80_sigma0.10": -0.44197967761483986,
+    "k3_n80_sigma1.00": -0.625599630630781,
+    "k4_n80_sigma0.10": -0.4918929888576029,
+    "k4_n80_sigma1.00": -0.6468416633754533
+  },
+  "switching_slopes_loglog": {
+    "obs0.15": {
+      "regime_error_slope_loglog": 0.03407172412209222,
+      "state_mse_slope_loglog": -0.002677538312184606
+    },
+    "obs0.30": {
+      "regime_error_slope_loglog": 0.3283521656600402,
+      "state_mse_slope_loglog": 0.015352419407040916
+    }
+  }
+}

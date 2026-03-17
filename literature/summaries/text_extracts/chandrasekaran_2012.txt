@@ -1,0 +1,2014 @@
+arXiv:1008.1290v2 [math.ST] 2 Nov 2012
+
+The Annals of Statistics
+2012, Vol. 40, No. 4, 1935–1967
+DOI: 10.1214/11-AOS949
+c Institute of Mathematical Statistics, 2012
+
+LATENT VARIABLE GRAPHICAL MODEL SELECTION VIA
+CONVEX OPTIMIZATION2
+By Venkat Chandrasekaran, Pablo A. Parrilo and
+Alan S. Willsky
+California Institute of Technology, Massachusetts Institute of Technology
+and Massachusetts Institute of Technology
+Suppose we observe samples of a subset of a collection of random
+variables. No additional information is provided about the number
+of latent variables, nor of the relationship between the latent and
+observed variables. Is it possible to discover the number of latent
+components, and to learn a statistical model over the entire collection of variables? We address this question in the setting in which
+the latent and observed variables are jointly Gaussian, with the conditional statistics of the observed variables conditioned on the latent
+variables being specified by a graphical model. As a first step we
+give natural conditions under which such latent-variable Gaussian
+graphical models are identifiable given marginal statistics of only the
+observed variables. Essentially these conditions require that the conditional graphical model among the observed variables is sparse, while
+the effect of the latent variables is “spread out” over most of the observed variables. Next we propose a tractable convex program based
+on regularized maximum-likelihood for model selection in this latentvariable setting; the regularizer uses both the ℓ1 norm and the nuclear
+norm. Our modeling framework can be viewed as a combination of
+dimensionality reduction (to identify latent variables) and graphical
+modeling (to capture remaining statistical structure not attributable
+to the latent variables), and it consistently estimates both the numReceived August 2010; revised November 2011.
+Discussed in 10.1214/12-AOS979, 10.1214/12-AOS980, 10.1214/12-AOS981,
+10.1214/12-AOS984, 10.1214/12-AOS985 and 10.1214/12-AOS1001; rejoinder at
+10.1214/12-AOS1020.
+2
+Supported in part by AFOSR Grant FA9550-08-1-0180, in part under a MURI through
+AFOSR Grant FA9550-06-1-0324, in part under a MURI through AFOSR Grant FA955006-1-0303 and in part by NSF FRG 0757207.
+AMS 2000 subject classifications. 62F12, 62H12.
+Key words and phrases. Gaussian graphical models, covariance selection, latent variables, regularization, sparsity, low-rank, algebraic statistics, high-dimensional asymptotics.
+1
+
+This is an electronic reprint of the original article published by the
+Institute of Mathematical Statistics in The Annals of Statistics,
+2012, Vol. 40, No. 4, 1935–1967. This reprint differs from the original in
+pagination and typographic detail.
+1
+
+2
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+ber of latent components and the conditional graphical model structure among the observed variables. These results are applicable in
+the high-dimensional setting in which the number of latent/observed
+variables grows with the number of samples of the observed variables.
+The geometric properties of the algebraic varieties of sparse matrices
+and of low-rank matrices play an important role in our analysis.
+
+1. Introduction and setup. Statistical model selection in the high-dimensional regime arises in a number of applications. In many data analysis
+problems in geophysics, radiology, genetics, climate studies, and image processing, the number of samples available is comparable to or even smaller
+than the number of variables. As empirical statistics in these settings may
+not be well-behaved (see [17, 22]), high-dimensional model selection is therefore both challenging and of great interest. A model selection problem that
+has received considerable attention recently is the estimation of covariance
+matrices in the high-dimensional setting. As the sample covariance matrix
+is poorly behaved in such a regime, some form of regularization of the sample covariance is adopted based on assumptions about the true underlying
+covariance matrix [1, 2, 12, 14, 20, 36].
+Graphical models. A number of papers have studied covariance estimation in the context of Gaussian graphical model selection. A Gaussian graphical model [19, 30] (also commonly referred to as a Gauss–Markov random
+field) is a statistical model defined with respect to a graph, in which the
+nodes index a collection of jointly Gaussian random variables and the edges
+represent the conditional independence relations (Markov structure) among
+the variables. In such models the sparsity pattern of the inverse of the covariance matrix, or the concentration matrix, directly corresponds to the
+graphical model structure. Specifically, consider a Gaussian graphical model
+in which the covariance matrix is given by a positive-definite Σ∗ and the concentration matrix is given by K ∗ = (Σ∗ )−1 . Then an edge {i, j} is present in
+∗ 6= 0. In particular the abthe underlying graphical model if and only if Ki,j
+sence of an edge between two nodes implies that the corresponding variables
+are independent conditioned on all the other variables. The model selection
+method usually studied in such a Gaussian graphical model setting is ℓ1 regularized maximum-likelihood, with the ℓ1 penalty applied to the entries
+of the concentration matrix to induce sparsity. The consistency properties
+of such an estimator have been studied [18, 26, 29], and under suitable conditions [18, 26] this estimator is also “sparsistent,” that is, the estimated
+concentration matrix has the same sparsity pattern as the true model from
+which the samples are generated. An alternative approach to ℓ1 -regularized
+maximum-likelihood is to estimate the sparsity pattern of the concentration
+matrix by performing regression separately on each variable [23]; while such
+
+LATENT VARIABLE MODEL SELECTION
+
+3
+
+a method consistently estimates the sparsity pattern, it does not directly
+provide estimates of the covariance or concentration matrix.
+In many applications throughout science and engineering (e.g., psychology, computational biology, and economics), a challenge is that one may not
+have access to observations of all the relevant phenomena, that is, some of
+the relevant variables may be latent or unobserved. In general latent variables pose a significant difficulty for model selection because one may not
+know the number of relevant latent variables, nor the relationship between
+these variables and the observed variables. Typical algorithmic methods that
+try to get around this difficulty usually fix the number of latent variables
+as well as the structural relationship between latent and observed variables
+(e.g., the graphical model structure between latent and observed variables),
+and use the EM algorithm to fit parameters [9]. This approach suffers from
+the problem that one optimizes nonconvex functions, and thus one may
+get stuck in suboptimal local minima. An alternative suggestion [13] is one
+based on a greedy, local, combinatorial heuristic that assigns latent variables
+to groups of observed variables, via some form of clustering of the observed
+variables; however, this approach has no consistency guarantees.
+Our setup. In this paper we study the problem of latent-variable graphical model selection in the setting where all the variables, both observed and
+latent, are jointly Gaussian. More concretely, X is a Gaussian random vector
+in Rp+h , O and H are disjoint subsets of indices in {1, . . . , p + h} of cardinalities |O| = p and |H| = h, and the corresponding subvectors of X are denoted
+by XO and XH , respectively. Let the covariance matrix underlying X be denoted by Σ∗(O H) . The marginal statistics corresponding to the observed variables XO are given by the marginal covariance matrix Σ∗O , which is simply
+a submatrix of the full covariance matrix Σ∗(O H) . However, suppose that we
+∗
+∗
+−1
+parameterize our model by the concentration matrix K(O
+H) = (Σ(O H) ) ,
+which as discussed above reveals the connection to graphical models. Here
+∗ , K∗
+∗
+the submatrices KO
+O,H , KH specify (in the full model) the dependencies
+among the observed variables, between the observed and latent variables,
+and among the latent variables, respectively. In such a parameterization,
+the marginal concentration matrix (Σ∗O )−1 corresponding to the observed
+variables XO is given by the Schur complement [16] with respect to the
+∗:
+block KH
+(1.1)
+
+∗
+∗
+∗
+∗ −1 ∗
+K̃O
+= (Σ∗O )−1 = KO
+− KO,H
+(KH
+) KH,O .
+
+∗ ).
+Thus if we only observe the variables XO , we only have access to Σ∗O (or K̃O
+∗
+The two terms that compose K̃O above have interesting properties. The ma∗ specifies the concentration matrix of the conditional statistics of the
+trix KO
+observed variables given the latent variables. If these conditional statistics
+
+4
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+∗ is sparse. On the other hand,
+are given by a sparse graphical model, then KO
+∗
+∗
+−1
+∗
+the matrix KO,H (KH ) KH,O serves as a summary of the effect of marginalization over the latent variables XH . This matrix has small rank if the number of latent, unobserved variables XH is small relative to the number of
+∗ is
+observed variables XO . Therefore the marginal concentration matrix K̃O
+∗
+∗
+−1
+∗
+generally not sparse due to the additional low-rank term KO,H (KH ) KH,O .
+Hence standard graphical model selection techniques applied directly to the
+observed variables XO are not useful.
+A modeling paradigm that infers the effect of the latent variables XH
+would be more suitable in order to provide a concise explanation of the underlying statistical structure. Hence we approximate the sample covariance
+by a model in which the concentration matrix decomposes into the sum of a
+sparse matrix and a low-rank matrix, which reveals the conditional graphical
+model structure in the observed variables as well as the number of and effect
+due to the unobserved latent variables. Such a method can be viewed as a
+blend of principal component analysis and graphical modeling. In standard
+graphical modeling one would directly approximate a concentration matrix
+by a sparse matrix to learn a sparse graphical model, while in principal component analysis the goal is to explain the statistical structure underlying a
+set of observations using a small number of latent variables (i.e., approximate a covariance matrix as a low-rank matrix). In our framework we learn
+a sparse graphical model among the observed variables conditioned on a few
+(additional) latent variables. These latent variables are not principal components, as the conditional statistics (conditioned on these latent variables)
+are given by a graphical model. Therefore we refer to these latent variables
+informally as latent components.
+
+Contributions. Our first contribution in Section 3 is to address the fundamental question of identifiability of such latent-variable graphical models
+given the marginal statistics of only the observed variables. The critical point
+is that we need to tease apart the correlations induced due to marginalization over the latent variables from the conditional graphical model structure among the observed variables. As the identifiability problem is one of
+uniquely decomposing the sum of a sparse matrix and a low-rank matrix
+into the individual components, we study the algebraic varieties of sparse
+matrices and low-rank matrices. An important theme in this paper is the
+connection between the tangent spaces to these algebraic varieties and the
+∗ ) denote the tangent space at
+question of identifiability. Specifically let Ω(KO
+∗
+∗
+∗ )−1 K ∗ )
+KO to the algebraic variety of sparse matrices, and let T (KO,H
+(KH
+H,O
+∗
+∗ )−1 K ∗
+denote the tangent space at KO,H
+(KH
+to
+the
+algebraic
+variety
+of
+H,O
+∗
+low-rank matrices. Then the statistical question of identifiability of KO
+∗
+∗ )−1 K ∗
+∗
+and KO,H
+(KH
+H,O given K̃O is determined by the geometric notion of
+
+LATENT VARIABLE MODEL SELECTION
+
+5
+
+∗ ) and T (K ∗
+∗ −1 ∗
+transversality of the tangent spaces Ω(KO
+O,H (KH ) KH,O ). The
+study of the transversality of these tangent spaces leads to natural conditions
+for identifiability. In particular we show that latent-variable models in which
+∗ has a small number of nonzeros per row/column,
+(1) the sparse matrix KO
+∗
+∗ )−1 K ∗
+and (2) the low-rank matrix KO,H
+(KH
+H,O has row/column spaces that
+are not closely aligned with the coordinate axes, are identifiable. These conditions have natural statistical interpretations. The first condition ensures
+that there are no densely connected subgraphs in the conditional graphical
+model structure among the observed variables, that is, that these conditional statistics are indeed specified by a sparse graphical model. Such statistical relationships may otherwise be mistakenly attributed to the effect
+of marginalization over some latent variable. The second condition ensures
+that the effect of marginalization over the latent variables is “spread out”
+over many observed variables; thus, the effect of marginalization over a latent variable is not confused with the conditional graphical model structure
+among the observed variables. In fact the first condition is often assumed in
+standard graphical model selection without latent variables (e.g., [26]).
+As our next contribution we propose a regularized maximum-likelihood
+decomposition framework to approximate a given sample covariance matrix
+by a model in which the concentration matrix decomposes into a sparse
+matrix and a low-rank matrix. Based on the effectiveness of the ℓ1 norm as
+a tractable convex relaxation for recovering sparse models [5, 10, 11] and
+the nuclear norm for low-rank matrices [4, 15, 27], we propose the following
+penalized likelihood method given a sample covariance matrix ΣnO formed
+from n samples of the observed variables:
+
+(Ŝn , L̂n ) = arg min −ℓ(S − L; ΣnO ) + λn (γkSk1 + tr(L))
+(1.2)
+
+S,L
+
+s.t. S − L ≻ 0, L  0.
+The constraints ≻ 0 and  0 impose positive-definiteness and positive-semidefiniteness. The function ℓ represents the Gaussian log-likelihood ℓ(K; Σ) =
+log det(K) − tr(KΣ) for K ≻ 0, where tr is the trace of a matrix and det is
+∗ , which represents the
+the determinant. Here Ŝn provides an estimate of KO
+conditional concentration matrix of the observed variables; L̂n provides an
+∗
+∗ )−1 K ∗ , which represents the effect of marginalizaestimate of KO,H
+(KH
+H,O
+tion over the latent variables. The regularizer is a combination of the ℓ1 norm
+applied to S and the nuclear norm applied to L (the nuclear norm reduces to
+the trace over the cone of symmetric, positive-semidefinite matrices), with
+γ providing a trade-off between the two terms. This variational formulation
+is a convex optimization problem, and it is a regularized max-det program
+that can be solved in polynomial time using general-purpose solvers [33].
+
+6
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+Our main result in Section 4 is a proof of the consistency of the estimator (1.2) in the high-dimensional regime in which both the number of observed variables and the number of latent components are allowed to grow
+with the number of samples (of the observed variables). We show that for
+a suitable choice of the regularization parameter λn , there exists a range
+of values of γ for which the estimates (Ŝn , L̂n ) have the same sparsity (and
+∗ , K∗
+∗ −1 ∗
+sign) pattern and rank as (KO
+O,H (KH ) KH,O ) with high probability
+(see Theorem 4.1). The key technical requirement is an identifiability con∗
+dition for the two components of the marginal concentration matrix K̃O
+with respect to the Fisher information (see Section 3.4). We make connections between our condition and the irrepresentability conditions required for
+support/graphical-model recovery using ℓ1 regularization [26, 32, 37]. Our
+results provide numerous scaling regimes under which consistency holds in
+latent-variable graphical model selection. For example, we show that under
+suitable identifiability conditions consistent model selection is possible even
+when the number of samples and the number of latent variables are on the
+same order as the number of observed variables (see Section 4.2).
+Related previous work. The problem of decomposing the sum of a sparse
+matrix and a low-rank matrix via convex optimization into the individual
+components was initially studied in [7] by a superset of the authors of the
+present paper, with conditions derived under which the convex program exactly recovers the underlying components. In subsequent work Candès et
+al. [3] also studied this sparse-plus-low-rank decomposition problem, and
+provided guarantees for exact recovery using the convex program proposed
+in [7]. The problem setup considered in the present paper is quite different and is more challenging because we are only given access to an inexact
+sample covariance matrix, and we wish to produce an inverse covariance
+matrix that can be decomposed as the sum of sparse and low-rank components (preserving the sparsity pattern and rank of the components in the
+true underlying model). In addition to proving the consistency of the estimator (1.2), we also provide a statistical interpretation of our identifiability
+conditions and describe natural classes of latent-variable Gaussian graphical models that satisfy these conditions. As such our paper is closer in spirit
+to the many recent papers on covariance selection, but with the important
+difference that some of the variables are not observed.
+Outline. Section 2 gives some background and a formal problem statement. Section 3 discusses the identifiability question, Section 4 states the
+main results of this paper, and Section 5 gives some proofs. We provide experimental demonstration of the effectiveness of our estimator on synthetic
+and real data in Section 6, and conclude with a brief discussion in Section 7.
+Some of our technical results are deferred to supplementary material [6].
+
+LATENT VARIABLE MODEL SELECTION
+
+7
+
+2. Problem statement and background. We give a formal statement of
+the latent-variable model selection problem. We also briefly describe various properties of the algebraic varieties of sparse matrices and of low-rank
+matrices, and the properties of the Gaussian likelihood function.
+The following matrix norms are employed throughout this paper. kM k2
+denotes the spectral norm, or the largest singular value of M . kM k∞ denotes the largest entry in magnitude of M . kM kF denotes the Frobenius
+norm, or the square root of the sum of the squares of the entries of M .
+kM k∗ denotes the nuclear norm, or the sum of the singular values of M
+(this reduces to the trace for positive-semidefinite matrices). kM k1 denotes
+the sum of the absolute values of the entries of M . A number of matrix
+operator norms are also used. For example, let Z : Rp×p → Rp×p be a linear operator acting on matrices. Then the induced operator norm is defined
+as kZkq→q , maxN ∈Rp×p ,kN kq ≤1 kZ(N )kq . Therefore, kZkF →F denotes the
+spectral norm of the operator Z. The only vector norm used is the Euclidean norm, which is denoted by k · k. Given any norm k · kq (either a
+vector norm, a matrix norm or a matrix operator norm), the dual norm is
+given by kM k∗q , sup{hM, N i|kN kq ≤ 1}.
+2.1. Problem statement. In order to analyze latent-variable model selection methods, we need to define an appropriate notion of model selection
+consistency for latent-variable graphical models. Given the two components
+∗ and K ∗
+∗ −1 ∗
+KO
+O,H (KH ) KH,O of the concentration matrix of the marginal distribution (1.1), there are infinitely many configurations of the latent vari∗ ≻ 0, K ∗
+∗
+T
+ables [i.e., matrices KH
+O,H = (KH,O ) ] that give rise to the same
+∗
+∗ )−1 K ∗ . Specifically for any nonsingular matrix
+low-rank matrix KO,H
+(KH
+H,O
+∗ → BK ∗ B T , K ∗
+B ∈ R|H|×|H| , one can apply the transformations KH
+H
+O,H →
+∗
+T
+∗
+∗
+−1
+∗
+KO,H B and still preserve the low-rank matrix KO,H (KH ) KH,O . In all of
+these models the marginal statistics of the observed variables XO remain the
+same upon marginalization over the latent variables XH . The key invariant
+∗
+∗ )−1 K ∗ , which summarizes the effect of
+is the low-rank matrix KO,H
+(KH
+H,O
+marginalization over the latent variables. Consequently, from here on we use
+∗ and L∗ = K ∗
+∗ −1 ∗
+the notation S ∗ = KO
+O,H (KH ) KH,O . These observations give
+rise to the following notion of structure recovery.
+Definition 2.1. A pair of |O| × |O| symmetric matrices (Ŝ, L̂) is an
+algebraically correct estimate of a latent-variable Gaussian graphical model
+∗
+given by the concentration matrix K(O
+H) if the following conditions hold:
+(1) The sign-pattern of Ŝ is the same as that of S ∗ [here sign(0) = 0]:
+∗
+sign(Ŝi,j ) = sign(Si,j
+)
+
+∀i, j.
+
+8
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+(2) The rank of L̂ is the same as the rank of L∗ :
+rank(L̂) = rank(L∗ ).
+(3) The concentration matrix Ŝ − L̂ can be realized as the marginal concentration matrix of an appropriate latent-variable model:
+Ŝ − L̂ ≻ 0,
+
+L̂  0.
+
+When a sequence of estimators is algebraically correct with probability
+approaching 1 in a suitable high-dimensional scaling regime, then we say that
+the estimators are algebraically consistent. The first condition ensures that Ŝ
+provides the correct structural estimate of the conditional graphical model of
+the observed variables conditioned on the latent components. This property
+is the same as the “sparsistency” property studied in standard graphical
+model selection [18, 26]. The second condition ensures that the number of
+latent components is properly estimated. Finally, the third condition ensures
+that the pair of matrices (Ŝ, L̂) leads to a realizable latent-variable model.
+In particular, this condition implies that there exists a valid latent-variable
+model in which (a) the conditional graphical model structure among the
+observed variables is given by Ŝ, (b) the number of latent variables is equal to
+the rank of L̂, and (c) the extra correlations induced due to marginalization
+over the latent variables are equal to L̂. Any method for matrix factorization
+(e.g., [35]) can be used to further factorize L̂, depending on the property that
+one desires in the factors (e.g., sparsity).
+We also study estimation error rates in the usual sense, that is, we show
+that one can produce estimates (Ŝ, L̂) that are close in various norms to
+the matrices (S ∗ , L∗ ). Notice that bounding the estimation error in some
+norm does not in general imply that the support/sign-pattern and rank of
+(Ŝ, L̂) are the same as those of (S ∗ , L∗ ). Therefore bounded estimation error
+is different from algebraic correctness, which requires that (Ŝ, L̂) have the
+same support/sign-pattern and rank as (S ∗ , L∗ ).
+∗
+Goal. Let K(O
+H) denote the concentration matrix of a Gaussian model.
+i }n
+Suppose that we have n samples {XO
+i=1 of the observed variables XO .
+We would like to produce estimates (Ŝn , L̂n ) that, with high probability, are
+algebraically correct and have bounded estimation error (in some norm).
+
+Our approach. We propose the regularized likelihood convex program
+(1.2) to produce estimates (Ŝn , L̂n ). Specifically, the sample covariance matrix ΣnO in (1.2) is defined as
+n
+
+ΣnO ,
+
+1X i iT
+XO XO .
+n
+i=1
+
+LATENT VARIABLE MODEL SELECTION
+
+9
+
+∗
+We give conditions on the underlying model K(O
+H) and suitable choices for
+
+the parameters λn , γ under which the estimates (Ŝn , L̂n ) are consistent (see
+Theorem 4.1).
+2.2. Likelihood function and Fisher information. Given n samples {X i }ni=1
+of a finite collection of jointly Gaussian zero-mean random variables with
+concentration matrix K ∗ , it is easily seen that the log-likelihood function is
+given by:
+(2.1)
+
+ℓ(K; Σn ) = log det(K) − tr(KΣn ),
+
+where ℓ(K; Σn ) is a function of K. Notice that this function is strictly concave for K ≻ 0. In the latent-variable modeling problem with sample covariance ΣnO , the likelihood function with respect to the parametrization (S, L)
+is given by ℓ(S − L; ΣnO ). This function is jointly concave with respect to the
+parameters (S, L) whenever S − L ≻ 0, and it is employed in our variational
+formulation (1.2) to learn a latent-variable model.
+In the analysis of a convex program involving the likelihood function, the
+Fisher information plays an important role as it is the negative of the Hessian
+of the likelihood function and thus controls the curvature. As the first term
+in the likelihood function is linear, we need only study higher-order derivatives of the log-determinant function in order to compute the Hessian. In
+the latent-variable setting with the marginal concentration matrix of the ob∗ = (Σ∗ )−1 [see (1.1)], the corresponding Fisher
+served variables given by K̃O
+O
+information matrix is
+(2.2)
+
+∗ −1
+∗ −1
+∗
+) = Σ∗O ⊗ Σ∗O .
+) ⊗ (K̃O
+) = (K̃O
+I(K̃O
+
+Here ⊗ denotes the tensor product between matrices. Notice that this is
+precisely the |O|2 × |O|2 submatrix of the full Fisher information matrix
+∗
+∗
+∗
+∗
+I(K(O
+H) ) = Σ(O H) ⊗ Σ(O H) with respect to all the parameters K(O H) =
+(Σ∗(O H) )−1 (corresponding to the situation in which all the variables XO∪H
+are observed). In Section 3.4 we impose various conditions on the Fisher
+∗ ) under which our regularized maximum-likelihood
+information matrix I(K̃O
+formulation provides consistent estimates.
+2.3. Algebraic varieties of sparse and low-rank matrices. The set of sparse
+matrices and the set of low-rank matrices can be naturally viewed as algebraic varieties (solution sets of systems of polynomial equations). Here we
+describe these varieties, and discuss some of their geometric properties such
+as the tangent space and local curvature at a (smooth) point.
+Let S(k) denote the set of matrices with at most k nonzeros:
+(2.3)
+
+S(k) , {M ∈ Rp×p ||support(M )| ≤ k}.
+
+Here support denotes the locations of nonzero entries. The set S(k) is an
+2
+algebraic variety, and can in fact be viewed as a union of pk subspaces in
+
+10
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+Rp×p . This variety has dimension k, and it is smooth everywhere except at
+those matrices that have support size strictly smaller than k. For any matrix
+M ∈ Rp×p , consider the variety S(|support(M )|); M is a smooth point of this
+variety, and the tangent space at M is given by
+(2.4)
+
+Ω(M ) = {N ∈ Rp×p |support(N ) ⊆ support(M )}.
+
+Next let L(r) denote the algebraic variety of matrices with rank at most r:
+(2.5)
+
+L(r) , {M ∈ Rp×p |rank(M ) ≤ r}.
+
+It is easily seen that L(r) is an algebraic variety because it can be defined
+through the vanishing of all (r + 1) × (r + 1) minors. This variety has dimension equal to r(2p − r), and it is smooth everywhere except at those
+matrices that have rank strictly smaller than r. Consider a rank-r matrix
+M with singular value decomposition (SVD) given by M = U DV T , where
+U, V ∈ Rp×r and D ∈ Rr×r . The matrix M is a smooth point of the variety
+L(rank(M )), and the tangent space at M with respect to this variety is
+given by
+(2.6)
+
+T (M ) = {U Y1T + Y2 V T |Y1 , Y2 ∈ Rp×r }.
+
+We view both Ω(M ) and T (M ) as subspaces in Rp×p . In Section 3 we explore
+the connection between geometric properties of these tangent spaces and the
+identifiability problem in latent-variable graphical models.
+Curvature of rank variety. The sparse matrix variety S(k) has the property that it has zero curvature at any smooth point. The situation is more
+complicated for the low-rank matrix variety L(r), because the curvature at
+any smooth point is nonzero. We analyze how this variety curves locally, by
+studying how the tangent space changes from one point to a neighboring
+point. Indeed the amount of curvature at a point is directly related to the
+“angle” between the tangent space at that point and the tangent space at a
+neighboring point. For any linear subspace T of matrices, let PT denote the
+projection onto T . Given two subspaces T1 , T2 of the same dimension, we
+measure the “twisting” between these subspaces by considering the following
+quantity:
+(2.7)
+
+ρ(T1 , T2 ) , kPT1 − PT2 k2→2 = max k[PT1 − PT2 ](N )k2 .
+kN k2 ≤1
+
+In the supplement [6] we review relevant results from matrix perturbation
+theory, which suggest that the magnitude of the smallest nonzero singular
+value is closely tied to the local curvature of the variety. Therefore we control the twisting between tangent spaces at nearby points by bounding the
+smallest nonzero singular value away from zero.
+3. Identifiability. In the absence of additional conditions, the latentvariable model selection problem is ill-posed. In this section we discuss a
+set of conditions on latent-variable models that ensure that these mod-
+
+LATENT VARIABLE MODEL SELECTION
+
+11
+
+els are identifiable given marginal statistics for a subset of the variables.
+Some of the discussion in Sections 3.1 and 3.2 is presented in greater detail
+in [7].
+3.1. Structure between latent and observed variables. Suppose that the
+low-rank matrix that summarizes the effect of the latent components is itself sparse. This leads to identifiability issues in the sparse-plus-low-rank decomposition problem. Statistically the additional correlations induced due
+to marginalization over the latent variables could be mistaken for the conditional graphical model structure of the observed variables. In order to
+avoid such identifiability problems the effect of the latent variables must be
+“diffuse” across the observed variables. To address this point the following
+quantity was introduced in [7] for any matrix M , defined with respect to
+the tangent space T (M ):
+(3.1)
+
+ξ(T (M )) ,
+
+max
+
+kN k∞ .
+
+N ∈T (M ),kN k2 ≤1
+
+Thus ξ(T (M )) being small implies that elements of the tangent space T (M )
+cannot have their support concentrated in a few locations; as a result M
+cannot be too sparse. This idea is formalized in [7] by relating ξ(T (M )) to
+a notion of “incoherence” of the row/column spaces, where the row/column
+spaces are said to be incoherent with respect to the standard basis if these
+spaces are not aligned closely with any of the coordinate axes. Typically
+a matrix M with incoherent row/column spaces would have ξ(T (M )) ≪ 1.
+This point is quantified
+q precisely in [7]. Specifically, we note that ξ(T (M ))
+can be as small as ∼ pr for a rank-r matrix M ∈ Rp×p with row/column
+
+spaces that are almost maximally incoherent (e.g., if the row/column spaces
+span any r columns of a p × p orthonormal Hadamard matrix). On the other
+hand, ξ(T (M )) = 1 if the row/column spaces of M contain a standard basis
+vector.
+Based on these concepts we roughly require that the low-rank matrix that
+summarizes the effect of the latent variables be incoherent, thereby ensuring
+that the extra correlations due to marginalization over the latent components cannot be confused with the conditional graphical model structure of
+the observed variables. Notice that the quantity ξ is not just a measure of the
+number of latent variables, but also of the overall effect of the correlations
+induced by marginalization over these variables.
+Curvature and change in ξ: As noted previously, an important technical
+point is that the algebraic variety of low-rank matrices is locally curved at
+any smooth point. Consequently the quantity ξ changes as we move along
+the low-rank matrix variety smoothly. The quantity ρ(T1 , T2 ) introduced
+in (2.7) allows us to bound the variation in ξ as follows (proof in Section 5):
+
+12
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+Lemma 3.1. Let T1 , T2 be two linear subspaces of matrices of the same
+dimension with the property that ρ(T1 , T2 ) < 1, where ρ is defined in (2.7).
+Then we have that
+1
+[ξ(T1 ) + ρ(T1 , T2 )].
+ξ(T2 ) ≤
+1 − ρ(T1 , T2 )
+3.2. Structure among observed variables. An identifiability problem also
+arises if the conditional graphical model among the observed variables contains a densely connected subgraph. These statistical relationships might be
+mistaken as correlations induced by marginalization over latent variables.
+Therefore we need to ensure that the conditional graphical model among
+the observed variables is sparse. We impose the condition that this conditional graphical model must have small “degree,” that is, no observed
+variable is directly connected to too many other observed variables conditioned on the latent components. Notice that bounding the degree is a more
+refined condition than simply bounding the total number of nonzeros as the
+sparsity pattern also plays a role. In [7] the authors introduced the following
+quantity in order to provide an appropriate measure of the sparsity pattern
+of a matrix:
+(3.2)
+
+µ(Ω(M )) ,
+
+max
+
+kN k2 .
+
+N ∈Ω(M ),kN k∞ ≤1
+
+The quantity µ(Ω(M )) being small for a matrix implies that the spectrum of
+any element of the tangent space Ω(M ) is not too “concentrated,” that is, the
+singular values of the elements of the tangent space are not too large. In [7]
+it is shown that a sparse matrix M with “bounded degree” (a small number
+of nonzeros per row/column) has small µ(M ). Specifically, if M ∈ Rp×p is
+any matrix with at most deg(M ) nonzero entries per row/column, then we
+have that
+µ(Ω(M )) ≤ deg(M ).
+3.3. Transversality of tangent spaces. Suppose that we have the sum of
+two vectors, each from two known subspaces. It is possible to uniquely recover the individual vectors from the sum if and only if the subspaces have a
+transverse intersection, that is, they only intersect at the origin. This simple
+observation leads to an appealing geometric notion of identifiability. Suppose now that we have the sum of a sparse matrix and a low-rank matrix,
+and that we are also given the tangent spaces at these matrices with respect to the algebraic varieties of sparse and low-rank matrices, respectively.
+Then a necessary and sufficient condition for identifiability with respect to
+the tangent spaces is that these spaces have a transverse intersection. This
+transverse intersection condition is also sufficient for local identifiability in
+
+LATENT VARIABLE MODEL SELECTION
+
+13
+
+a neighborhood around the sparse matrix and low-rank matrix with respect
+to the varieties of sparse and low-rank matrices (due to the inverse function
+theorem). It turns out that these tangent space transversality conditions are
+also sufficient for the convex program (1.2) to provide consistent estimates
+of a latent-variable graphical model (without any side information about the
+tangent spaces).
+In order to quantify the level of transversality between the tangent spaces
+Ω and T we study the minimum gain with respect to some norm of the addition operator (which adds two matrices) A : Rp×p × Rp×p → Rp×p restricted
+to the cartesian product Y = Ω × T . Then given any matrix norm k · kq on
+Rp×p × Rp×p , the minimum gain of A restricted to Y is defined as
+ε(Ω, T, k · kq ) ,
+
+min
+
+kPY A† APY (S, L)kq ,
+
+(S,L)∈Ω×T,k(S,L)kq =1
+
+where PY denotes the projection onto Y, and A† denotes the adjoint of the
+addition operator (with respect to the standard Euclidean inner-product).
+The “level” of transversality of Ω and T is measured by the magnitude of
+ε(Ω, T, k · kq ), with transverse intersection being equivalent to ε(Ω, T, k · kq ) >
+0. Note that ε(Ω, T, k · kF ) is the square of the minimum singular value of
+the addition operator A restricted to Ω × T .
+A natural norm with which to measure transversality is the dual norm
+of the regularization function in (1.2), as the subdifferential of the regularization function is specified in terms of its dual. The reasons for this will
+become clearer as we proceed through this paper. Recall that the regularization function used in the variational formulation (1.2) is given by
+fγ (S, L) = γkSk1 + kLk∗ ,
+
+where the nuclear norm k · k∗ reduces to the trace function over the cone
+of positive-semidefinite matrices. This function is a norm for all γ > 0. The
+dual norm of fγ is given by
+
+
+kSk∞
+gγ (S, L) = max
+, kLk2 .
+γ
+Next we define the quantity χ(Ω, T, γ) as follows in order to study the
+transversality of the spaces Ω and T with respect to the gγ norm:
+
+
+ξ(T )
+(3.3)
+, 2µ(Ω)γ .
+χ(Ω, T, γ) , max
+γ
+Here µ and ξ are defined in (3.2) and (3.1). We then have the following
+result (proved in Section 5):
+
+Lemma 3.2. Let S ∈ Ω, L ∈ T be matrices such that kSk∞ = γ and
+let kLk2 = 1. Then we have that gγ (PY A† APY (S, L)) ∈ [1 − χ(Ω, T, γ), 1 +
+χ(Ω, T, γ)], where Y = Ω × T and χ(Ω, T, γ) is defined in (3.3). In particular
+we have that 1 − χ(Ω, T, γ) ≤ ε(Ω, T, gγ ).
+
+14
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+The quantity χ(Ω, T, γ) being small implies that the addition operator
+is essentially isometric when restricted to Y = Ω × T . Stated differently,
+the magnitude of χ(Ω, T, γ) is a measure of the level of transversality of
+1
+the spaces Ω and T . If µ(Ω)ξ(T ) < 12 , then γ ∈ (ξ(T ), 2µ(Ω)
+) ensures that
+χ(Ω, T, γ) < 1, which in turn implies that the tangent spaces Ω and T have
+a transverse intersection.
+Observation: Thus we have that the smaller the quantities µ(Ω) and ξ(T ),
+the more transverse the intersection of the spaces Ω and T as measured by
+ε(Ω, T, gγ ).
+3.4. Conditions on Fisher information. The main focus of Section 4
+is to analyze the regularized maximum-likelihood convex program (1.2)
+by studying its optimality conditions. The log-likelihood function is wellapproximated in a neighborhood by a quadratic form given by the Fisher
+information (which measures the curvature, as discussed in Section 2.2). Let
+∗ ) denote the Fisher information evaluated at the true marginal
+I ∗ = I(K̃O
+∗ [see (1.1)]. The appropriate measure of transverconcentration matrix K̃O
+sality between the tangent spaces2 Ω = Ω(S ∗ ) and T = T (L∗ ) is then in a
+space in which the inner-product is given by I ∗ . Specifically, we need to
+analyze the minimum gain of the operator PY A† I ∗ APY restricted to the
+space Y = Ω × T . Therefore we impose several conditions on the Fisher information I ∗ . We define quantities that control the gains of I ∗ restricted to
+Ω and T separately; these ensure that elements of Ω and elements of T are
+individually identifiable under the map I ∗ . In addition we define quantities
+that, in conjunction with bounds on µ(Ω) and ξ(T ), allow us to control the
+gain of I ∗ restricted to the direct-sum Ω ⊕ T .
+I ∗ restricted to Ω: The minimum gain of the operator PΩ I ∗ PΩ restricted
+to Ω is given by
+αΩ ,
+
+kPΩ I ∗ PΩ (M )k∞ .
+
+min
+
+M ∈Ω,kM k∞ =1
+
+The maximum effect of elements in Ω in the orthogonal direction Ω⊥ is given
+by
+δΩ ,
+
+max
+
+kPΩ⊥ I ∗ PΩ (M )k∞ .
+
+M ∈Ω,kM k∞ =1
+
+The operator I ∗ is injective on Ω if αΩ > 0. The ratio αδΩΩ ≤ 1 − ν implies the
+irrepresentability condition imposed in [26], which gives a sufficient condition for consistent recovery of graphical model structure using ℓ1 -regularized
+maximum-likelihood. Notice that this condition is a generalization of the
+2
+
+We implicitly assume that these tangent spaces are subspaces of the space of symmetric
+matrices.
+
+LATENT VARIABLE MODEL SELECTION
+
+15
+
+usual Lasso irrepresentability conditions [32, 37], which are typically imposed on the covariance matrix. Finally we also consider the following quantity, which controls the behavior of I ∗ restricted to Ω in the spectral norm:
+βΩ ,
+
+max
+
+M ∈Ω,kM k2 =1
+
+kI ∗ (M )k2 .
+
+I ∗ restricted to T : Analogously to the case of Ω one could control the gains
+of the operators PT ⊥ I ∗ PT and PT I ∗ PT . However, as discussed previously,
+one complication is that the tangent spaces at nearby smooth points on the
+rank variety are in general different, and the amount of twisting between
+these spaces is governed by the local curvature. Therefore we control the
+gains of the operators PT ′⊥ I ∗ PT ′ and PT ′ I ∗ PT ′ for all tangent spaces T ′
+that are “close to” the nominal T (at the true underlying low-rank matrix),
+measured by ρ(T, T ′ ) (2.7) being small. The minimum gain of the operator
+PT ′ I ∗ PT ′ restricted to T ′ (close to T ) is given by
+αT ,
+
+min
+
+min
+
+ρ(T ′ ,T )≤ξ(T )/2 M ∈T ′ ,kM k2 =1
+
+kPT ′ I ∗ PT ′ (M )k2 .
+
+Similarly, the maximum effect of elements in T ′ in the orthogonal direction
+T ′⊥ (for T ′ close to T ) is given by
+δT ,
+
+max
+
+max
+
+ρ(T ′ ,T )≤ξ(T )/2 M ∈T ′ ,kM k2 =1
+
+kPT ′⊥ I ∗ PT ′ (M )k2 .
+
+Implicit in the definition of αT and δT is the fact that the outer minimum
+and maximum are only taken over spaces T ′ that are tangent spaces to
+the rank-variety. The operator I ∗ is injective on all tangent spaces T ′ such
+)
+that ρ(T ′ , T ) ≤ ξ(T
+2 if αT > 0. An irrepresentability condition (analogous to
+those developed for the sparse case) for tangent spaces near T to the rank
+variety would be that αδTT ≤ 1 − ν. Finally we also control the behavior of I ∗
+restricted to T ′ close to T in the ℓ∞ norm:
+βT ,
+
+max
+
+max
+
+kI ∗ (M )k∞ .
+
+ρ(T ′ ,T )≤ξ(T )/2 M ∈T ′ ,kM k∞ =1
+
+The two sets of quantities (αΩ , δΩ ) and (αT , δT ) essentially control how
+I ∗ behaves when restricted to the spaces Ω and T separately (in the natural
+norms). The quantities βΩ and βT are useful in order to control the gains of
+the operator I ∗ restricted to the direct sum Ω ⊕ T . Notice that although the
+magnitudes of elements in Ω are measured most naturally in the ℓ∞ norm,
+the quantity βΩ is specified with respect to the spectral norm. Similarly,
+elements of the tangent spaces T ′ to the rank variety are most naturally
+measured in the spectral norm, but βT provides control in the ℓ∞ norm.
+These quantities, combined with µ(Ω) and ξ(T ) [defined in (3.2) and (3.1)],
+provide the “coupling” necessary to control the behavior of I ∗ restricted to
+
+16
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+elements in the direct sum Ω ⊕ T . In order to keep track of fewer quantities,
+we summarize the six quantities as follows:
+α , min(αΩ , αT );
+
+δ , max(δΩ , δT );
+
+β , max(βΩ , βT ).
+
+Main assumption: There exists a ν ∈ (0, 12 ] such that
+δ
+≤ 1 − 2ν.
+α
+This assumption is to be viewed as a generalization of the irrepresentability conditions imposed on the covariance matrix [32, 37] or the Fisher information matrix [26] in order to provide consistency guarantees for sparse
+model selection using the ℓ1 norm. With this assumption we have the following proposition, proved in Section 5, about the gains of the operator I ∗
+restricted to Ω ⊕ T . This proposition plays a fundamental role in the analysis
+of the performance of the regularized maximum-likelihood procedure (1.2).
+Specifically, it gives conditions under which a suitable primal-dual pair can
+be specified to certify optimality with respect to (1.2) (see Section 5.2 for
+more details).
+Proposition 3.3. Let Ω and T be the tangent spaces defined in this
+section, and let I ∗ be the Fisher information evaluated at the true marginal
+concentration matrix. Further let α, β, ν be as defined above. Suppose that
+
+2
+1
+να
+µ(Ω)ξ(T ) ≤
+,
+6 β(2 − ν)
+and that γ is in the following range:
+
+
+να
+3ξ(T )β(2 − ν)
+,
+.
+γ∈
+να
+2µ(Ω)β(2 − ν)
+
+Then we have the following two conclusions for Y = Ω × T ′ with ρ(T ′ , T ) ≤
+ξ(T )
+2 :
+(1) The minimum gain of I ∗ restricted to Ω ⊕ T ′ is bounded below:
+α
+min
+gγ (PY A† I ∗ APY (S, L)) ≥ .
+2
+(S,L)∈Y,kSk∞ =γ,kLk2 =1
+Specifically this implies that for all (S, L) ∈ Y
+α
+gγ (S, L).
+2
+(2) The effect of elements in Y = Ω × T ′ on the orthogonal complement
+⊥
+Y = Ω⊥ × T ′⊥ is bounded above:
+gγ (PY A† I ∗ APY (S, L)) ≥
+
+kPY ⊥ A† I ∗ APY (PY A† I ∗ APY )−1 kgγ →gγ ≤ 1 − ν.
+
+Specifically this implies that for all (S, L) ∈ Y
+
+gγ (PY ⊥ A† I ∗ APY (S, L)) ≤ (1 − ν)gγ (PY A† I ∗ APY (S, L)).
+
+LATENT VARIABLE MODEL SELECTION
+
+17
+
+The last quantity we consider is the spectral norm of the marginal covari∗ )−1 :
+ance matrix Σ∗O = (K̃O
+(3.4)
+
+∗ −1
+ψ , kΣ∗O k2 = k(K̃O
+) k2 .
+
+A bound on ψ is useful in the probabilistic component of our analysis, in
+order to derive convergence rates of the sample covariance matrix to the
+true covariance matrix. We also observe that
+∗ −1
+∗ −1
+kI ∗ k2→2 = k(K̃O
+) ⊗ (K̃O
+) k2→2 = ψ 2 .
+
+Remarks. The quantities α, β, δ bound the gains of the Fisher information I ∗ restricted to the spaces Ω and T (and tangent spaces near T ). One
+can make stronger assumptions on I ∗ that are more easily interpretable.
+For example, αΩ , βΩ could bound the minimum/maximum gains of I ∗ for
+all matrices (rather than just those in Ω), and δΩ the I ∗ -inner-product
+for all pairs of orthogonal matrices (rather than just those in Ω and Ω⊥ ).
+Similarly, αT , βT could bound the minimum/maximum gains of I ∗ for all
+matrices (rather than just those near T ), and δT the I ∗ -inner-product for
+all pairs of orthogonal matrices (rather than just those near T and T ⊥ ).
+Such bounds would apply in either the k · k2→2 norm (for αT , δT , βΩ ) or the
+k · k∞→∞ norm (for αΩ , δΩ , βT ). These modified assumptions are global in
+nature (not restricted just to Ω or near T ) and are consequently stronger
+(they lower-bound the original αΩ , αT and they upper-bound the original
+βΩ , βT , δΩ , δT ), and they essentially control the gains of the operator I ∗ in
+the k · k2→2 norm and the k · k∞→∞ norm. In contrast, previous works on
+covariance selection [1, 2, 29] consider well-conditioned families of covariance
+matrices by bounding the minimum/maximum eigenvalues (i.e., gain with
+respect to the spectral norm).
+4. Consistency of regularized maximum-likelihood program.
+∗
+4.1. Main results. Recall that K(O
+H) denotes the full concentration matrix of a collection of zero-mean jointly-Gaussian observed and latent variables. Let p = |O| denote the number of observed variables, and let h = |H|
+i }n
+denote the number of latent variables. We are given n samples {XO
+i=1
+of the observed variables XO . We consider the high-dimensional setting
+in which (p, h, n) are all allowed to grow simultaneously. We present our
+main result next demonstrating the consistency of the estimator (1.2), and
+then discuss classes of latent-variable graphical models and various scaling
+regimes in which our estimator is consistent. Recall from (1.2) that λn is a
+regularization parameter, and γ is a trade-off parameter between the rank
+and sparsity terms. Notice from Proposition 3.3 that the choice of γ depends on the values of µ(Ω(S ∗ )) and ξ(T (L∗ )). While these quantities may
+
+18
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+not be known a priori, we discuss a method to choose γ numerically in our
+experimental results (see Section 6). The following theorem shows that the
+estimates (Ŝn , L̂n ) provided by the convex program (1.2) are consistent for
+a suitable choice of λn . In addition to the appropriate identifiability conditions (as specified by Proposition 3.3), we also impose lower bounds on
+the minimum magnitude nonzero entry θ of the sparse conditional graphical
+model matrix S ∗ and on the minimum nonzero singular value σ of the lowrank matrix L∗ summarizing the effect of the latent variables. The theorem
+is stated in terms of the quantities α, β, ν, ψ, and we particularly emphasize
+the dependence on µ(Ω(S ∗ )) and ξ(T (L∗ )) because these control the com∗
+plexity of the underlying latent-variable graphical model given by K(O
+H) .
+να
+A number of quantities play a role in our theorem: let D = max{1, 3β(2−ν) },
+1
+αν
+1
+αν
+α
+), C2 = 48
+C1 = ψ(1 + 6β
+α + ψ2 , Csamp = 32(3−ν)D min{ 4C1 , 256D(3−ν)ψC 2 },
+√
+
+, CS = max{( 6(2−ν)
+Cλ = 48 2Dψ(2−ν)
++ 1)C22 ψ 2 D, C2 +
+ν
+ξ(T )ν
+
+1
+
+3αC22 (2−ν)
+16(3−ν) } and CL =
+
+C2 να
+β(2−ν) .
+∗
+Theorem 4.1. Let K(O
+H) denote the concentration matrix of a Gausi }n
+sian model. We have n samples {XO
+i=1 of the p observed variables denoted
+∗
+∗
+by O. Let Ω = Ω(S ) and T = T (L ) denote the tangent spaces at S ∗ and at
+L∗ with respect to the sparse and low-rank matrix varieties, respectively.
+Assumptions: Suppose that the quantities µ(Ω) and ξ(T ) satisfy the assumption of Proposition 3.3 for identifiability, and γ is chosen in the range
+specified by Proposition 3.3. Further suppose that the following conditions
+hold:
+2
+
+128ψ
+(1) Let n ≥ ξ(Tp )4 max{ C
+, 2}, that is, we require that n & ξ(Tp )4 .
+2
+samp
+q
+q
+√
+48 2Dψ(2−ν)
+p
+p
+1
+(2) Set λn =
+n , that is, we require that λn ≍ ξ(T )
+n.
+ξ(T )ν
+q
+p
+1
+L λn
+(3) Let σ ≥ C
+,
+that
+is,
+we
+require
+that
+σ
+&
+2
+3
+n.
+ξ(T )
+ξ(T )
+q
+p
+1
+S λn
+(4) Let θ ≥ Cµ(Ω)
+, that is, we require that θ & ξ(T )µ(Ω)
+n.
+
+Conclusions: Then with probability greater than 1 − 2 exp{−p} we have
+algebraic correctness and estimation error given by:
+(1) sign(Ŝn ) = sign(S ∗ ) and rank(
+L̂n ) = q
+rank(L∗ ); q
+√
+
+2(3−ν)Dψ
+(2) gγ (Ŝn − S ∗ , L̂n − L∗ ) ≤ 512 ναξ(T
+)
+
+p
+1
+n . ξ(T )
+
+p
+n.
+
+The proof of this theorem is given in Section 5. The theorem essentially
+states that if the minimum nonzero singular value of the low-rank piece
+L∗ and minimum nonzero entry of the sparse piece S ∗ are bounded away
+from zero, then the convex program (1.2) provides estimates that are both
+
+LATENT VARIABLE MODEL SELECTION
+
+19
+
+algebraically correct and have bounded estimation error (in the ℓ∞ and
+spectral norms).
+Notice that the condition on the minimum singular value of L∗ is more
+stringent than the one on the minimum nonzero entry of S ∗ . One role played
+by these conditions is to ensure that the estimates (Ŝn , L̂n ) do not have
+smaller support size/rank than (S ∗ , L∗ ). However, the minimum singular
+value bound plays the additional role of bounding the curvature of the lowrank matrix variety around the point L∗ , which is the reason for this condition being more stringent. Notice also that the number of latent variables h
+does not explicitly appear in the bounds in Theorem 4.1, which only depend
+on p, µ(Ω(S ∗ )), ξ(T (L∗ )). However, the dependence on h is implicit in the
+dependence on ξ(T (L∗ )), and we discuss this point in greater detail in the
+following section.
+Finally we note that consistency holds in Theorem 4.1 for a range of values
+)
+να
+, 2β(2−ν)µ(Ω)
+]. In particular the assumptions on the sample
+of γ ∈ [ 3β(2−ν)ξ(T
+να
+complexity, the minimum nonzero singular value of L∗ , and the minimum
+magnitude nonzero entry of S ∗ are governed by the lower end of this range
+for γ. These assumptions can be weakened if we only require consistency
+for a smaller range of values of γ. The next result conveys this point with a
+specific example.
+Corollary 4.2. Consider the same setup and notation as in Theorem 4.1. Suppose that the quantities µ(Ω) and ξ(T ) satisfy the assumption
+να
+of Proposition 3.3 for identifiability, and that γ = 2β(2−ν)µ(Ω)
+(the upper
+1
+end of the range specified in Proposition 3.3), that is, γ ≍ µ(Ω) . Further
+q
+q
+2
+p
+suppose that: (1) n & µ(Ω)4 p; (2) λn ≍ µ(Ω) np ; (3) σ & µ(Ω)
+n ; (4)
+ξ(T )
+q
+θ & np . Then with probability greater than 1 − 2 exp{−p} we have estimates (Ŝn , L̂n ) that are algebraically
+correct, and with the error bounded as
+q
+
+gγ (Ŝn − S ∗ , L̂n − L∗ ) . µ(Ω)
+
+p
+n.
+
+The proof of this corollary3 is analogous to that of Theorem 4.1. We
+emphasize that in practice it is often beneficial to have consistent estimates
+for a range of values of γ (as in Theorem 4.1). Specifically, the stability of
+the sparsity pattern and rank of the estimates (Ŝn , L̂n ) for a range of tradeoff parameters is useful in order to choose a suitable value of γ, as prior
+information about the quantities µ(Ω(S ∗ )) and ξ(T (L∗ )) is not typically
+available (see Section 6).
+3
+By making stronger assumptions on the Fisher information matrix I ∗ , one can further remove
+p the factor of ξ(T ) in the lower bound for σ. Specifically, the lower bound
+σ & µ(Ω)3 np suffices for consistent estimation if the bounds defined by the quantities
+αT , βT , δT can be strengthened as described in the remarks at the end of Section 3.4.
+
+20
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+We remark here that the identifiability conditions of Proposition 3.3 are
+the main sufficient conditions required for Theorem 4.1 and Corollary 4.2 to
+hold. It would be interesting to obtain necessary conditions as well for these
+results, analogous to the necessity and sufficiency of the irrepresentability
+conditions for the Lasso [32, 37].
+4.2. Scaling regimes. Next we consider classes of latent-variable models
+that satisfy the conditions of Theorem 4.1. Recall from Section 3.2 that
+µ(Ω(S ∗ )) ≤ deg(S ∗ ). Throughout this section, we consider latent-variable
+models in whichqthe low-rank matrix L∗ is almost maximally incoherent, that
+is, ξ(T (L∗ )) ∼ hp so the effect of marginalization over the latent variables
+is diffuse across almost all the observed variables. We suppress the dependence on the quantities α, β, ν, ψ defined in Section 3.4 in our scaling results,
+and specifically focus on the trade-off between ξ(T (L∗ )) and µ(Ω(S ∗ )) for
+consistent estimation (we also suppress the dependence of these quantities
+on n). Thus, based on Proposition 3.3 we study latent-variable models in
+which
+s
+!
+h
+deg(S ∗ ) = O(1).
+ξ(T (L∗ ))µ(Ω(S ∗ )) = O
+p
+As we describe next, there are nontrivial classes of latent-variable graphical
+models in which this condition holds.
+Bounded degree: The first class of latent-variable models that we consider
+are those in which the conditional graphical model among the observed
+∗ ) has constant degree:
+variables (given by KO
+deg(S ∗ ) = O(1),
+
+h ∼ p.
+
+Such models can be estimated consistently from n ∼ p samples. Thus consistent latent-variable model selection is possible even when the number of
+samples and the number of latent variables are on the same order as the
+number of observed variables.
+Polylogarithmic degree: The next class of models that we consider are
+those in which the degree of the conditional graphical model of the observed
+variables grows polylogarithmically with p:
+p
+deg(S ∗ ) ∼ log(p)q ,
+h∼
+.
+log(p)2q
+Such latent-variable graphical models can be consistently estimated as long
+as n ∼ p polylog(p).
+For standard graphical model selection with no latent variables, ℓ1 -regularized maximum-likelihood is shown to be consistent with n = O(log p) samples [26]. On the other hand, our results prove consistency in the setting
+with latent variables when n = O(p) samples. It would be interesting to
+study whether these rates are inherent to latent-variable model selection.
+
+LATENT VARIABLE MODEL SELECTION
+
+21
+
+4.3. Rates for covariance matrix estimation. Theorem 4.1 gives conditions under which we can consistently estimate the sparse and low-rank parts
+∗ . Here we state a corolthat compose the marginal concentration matrix K̃O
+lary that gives rates for covariance matrix estimation, that is, the quality
+of the estimate (Ŝn − L̂n )−1 with respect to the “true” marginal covariance
+matrix Σ∗O .
+Corollary 4.3. Under the same conditions as in Theorem 4.1, we have
+with probability greater than 1 − 2 exp{−p} that
+
+
+ν
+†
+−1
+∗
+.
+gγ (A [(Ŝn − L̂n ) − ΣO ]) ≤ λn 1 +
+6(2 − ν)
+q
+p
+1
+This corollary implies that k(Ŝn − L̂n )−1 − Σ∗O k2 . ξ(T
+n based on the
+)
+q
+choice of λn in Theorem 4.1, and that k(Ŝn − L̂n )−1 − Σ∗O k2 . µ(Ω) np based
+on the choice of λn in Corollary 4.2.
+5. Proofs.
+5.1. Proofs of Section 3. Here we give proofs of the results stated in
+Section 3.
+Proof of Lemma 3.1. Since ρ(T1 , T2 ) < 1, the largest principal angle between T1 and T2 is strictly less than π2 . Consequently, the mapping
+PT2 : T1 → T2 restricted to T1 is bijective (as it is injective, and the spaces
+T1 , T2 have the same dimension). Consider the maximum and minimum gains
+of PT2 restricted to T1 ; for any M ∈ T1 , kM k2 = 1:
+kPT2 (M )k2 = kM + [PT2 − PT1 ](M )k2 ∈ [1 − ρ(T1 , T2 ), 1 + ρ(T1 , T2 )].
+Therefore, we can rewrite ξ(T2 ) as follows:
+ξ(T2 ) =
+≤
+≤
+
+max
+
+kN k∞ =
+
+N ∈T2 ,kN k2 ≤1
+
+max
+
+kPT2 (N )k∞
+
+N ∈T2 ,kN k2 ≤1
+
+max
+
+kPT2 (N )k∞
+
+max
+
+[kN k∞ + k[PT1 − PT2 ](N )k∞ ]
+
+N ∈T1 ,kN k2 ≤1/(1−ρ(T1 ,T2 ))
+N ∈T1 ,kN k2 ≤1/(1−ρ(T1 ,T2 ))
+
+i
+h
+1
+ξ(T1 ) +
+max
+k[PT1 − PT2 ](N )k∞
+1 − ρ(T1 , T2 )
+N ∈T1 ,kN k2 ≤1
+i
+h
+1
+ξ(T1 ) + max k[PT1 − PT2 ](N )k2
+≤
+1 − ρ(T1 , T2 )
+kN k2 ≤1
+≤
+
+1
+[ξ(T1 ) + ρ(T1 , T2 )].
+1 − ρ(T1 , T2 )
+This concludes the proof of the lemma. 
+≤
+
+22
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+Proof of Lemma 3.2. We have that A† A(S, L) = (S + L, S + L);
+therefore, PY A† APY (S, L) = (S + PΩ (L), PT (S) + L). We need to bound
+kS + PΩ (L)k∞ and kPT (S) + Lk2 . First, we have
+kS + PΩ (L)k∞ ∈ [kSk∞ − kPΩ (L)k∞ , kSk∞ + kPΩ (L)k∞ ]
+⊆ [kSk∞ − kLk∞ , kSk∞ + kLk∞ ]
+⊆ [γ − ξ(T ), γ + ξ(T )].
+Similarly, one can check that
+kPT (S) + Lk2 ∈ [−kPT (S)k2 + kLk2 , kPT (S)k2 + kLk2 ]
+⊆ [1 − 2kSk2 , 1 + 2kSk2 ]
+⊆ [1 − 2γµ(Ω), 1 + 2γµ(Ω)].
+These two bounds give us the desired result. 
+Proof of Proposition 3.3. Before proving the two parts of this
+proposition we make a simple observation about ξ(T ′ ) using the condition
+)
+that ρ(T, T ′ ) ≤ ξ(T
+2 by applying Lemma 3.1:
+ξ(T ′ ) ≤
+
+3ξ(T )/2
+ξ(T ) + ρ(T, T ′ )
+≤
+≤ 3ξ(T ).
+′
+1 − ρ(T, T )
+1 − ξ(T )/2
+
+Here we used the property that ξ(T ) ≤ 1 in obtaining the final inequality.
+)
+να
+Consequently, noting that γ ∈ [ 3β(2−ν)ξ(T
+, 2β(2−ν)µ(Ω)
+] implies that
+να
+
+
+να
+ξ(T ′ )
+(5.1)
+, 2µ(Ω)γ ≤
+.
+χ(Ω, T ′ , γ) = max
+γ
+β(2 − ν)
+Part 1: The proof of this step proceeds in a similar manner to that of
+Lemma 3.2. First we have for S ∈ Ω, L ∈ T ′ with kSk∞ = γ, kLk2 = 1:
+kPΩ I ∗ (S + L)k∞ ≥ kPΩ I ∗ Sk∞ − kPΩ I ∗ Lk∞ ≥ αγ − kI ∗ Lk∞ ≥ αγ − βξ(T ′ ).
+Next, under the same conditions on S, L,
+kPT ′ I ∗ (S + L)k2 ≥ kPT ′ I ∗ Lk2 − kPT ′ I ∗ Sk2 ≥ α − 2kI ∗ Sk2 ≥ α − 2βµ(Ω)γ.
+Combining these last two bounds with (5.1), we conclude that
+min
+
+(S,L)∈Y,kSk∞ =γ,kLk2 =1
+
+gγ (PY A† I ∗ APY (S, L))
+
+ξ(T ′ )
+, 2µ(Ω)γ
+≥ α − β max
+γ
+
+
+
+
+≥α−
+
+να
+2α(1 − ν) α
+=
+≥ ,
+2−ν
+2−ν
+2
+
+where the final inequality follows from the assumption that ν ∈ (0, 21 ].
+
+LATENT VARIABLE MODEL SELECTION
+
+23
+
+Part 2: Note that for S ∈ Ω, L ∈ T ′ with kSk∞ ≤ γ, kLk2 ≤ 1,
+
+kPΩ⊥ I ∗ (S + L)k∞ ≤ kPΩ⊥ I ∗ Sk∞ + kPΩ⊥ I ∗ Lk∞ ≤ δγ + βξ(T ′ ).
+
+Similarly,
+kPT ′⊥ I ∗ (S + L)k2 ≤ kPT ′⊥ I ∗ Sk2 + kPT ′⊥ I ∗ Lk2 ≤ βγµ(Ω) + δ.
+Combining these last two bounds with the bounds from the first part, we
+have that
+kPY ⊥ A† I ∗ APY (PY A† I ∗ APY )−1 kgγ →gγ
+≤
+
+δ + β max{ξ(T ′ )/γ, 2µ(Ω)γ}
+δ + να/(2 − ν)
+≤
+α − β max{ξ(T ′ )/γ, 2µ(Ω)γ} α − να/(2 − ν)
+
+≤
+
+(1 − 2ν)α + να/(2 − ν)
+= 1 − ν.
+α − να/(2 − ν)
+
+This concludes the proof of the proposition. 
+5.2. Proof strategy for Theorem 4.1. Standard results from convex analysis [28] state that (Ŝn , L̂n ) is a minimum of the convex program (1.2) if the
+zero matrix belongs to the subdifferential of the objective function evaluated
+at (Ŝn , L̂n ) [in addition to (Ŝn , L̂n ) satisfying the constraints]. Elements of
+the subdifferentials with respect to the ℓ1 norm and the nuclear norm at a
+matrix M have the key property that they decompose with respect to the
+tangent spaces Ω(M ) and T (M ) [34]. This decomposition property plays a
+critical role in our analysis. In particular it states that the optimality conditions consist of two parts, one part corresponding to the tangent spaces Ω
+and T and another corresponding to the normal spaces Ω⊥ and T ⊥ .
+Our analysis proceeds by constructing a primal-dual pair of variables that
+certify optimality with respect to (1.2). Consider the optimization problem (1.2) with the additional (nonconvex) constraints that the variable S
+belongs to the algebraic variety of sparse matrices and that the variable L
+belongs to the algebraic variety of low-rank matrices. While this new optimization problem is nonconvex, it has a very interesting property. At a
+globally optimal solution (and indeed at any locally optimal solution) (S̃, L̃)
+such that S̃ and L̃ are smooth points of the algebraic varieties of sparse and
+low-rank matrices, the first-order optimality conditions state that the Lagrange multipliers corresponding to the additional variety constraints must
+lie in the normal spaces Ω(S̃)⊥ and T (L̃)⊥ . This basic observation, combined with the decomposition property of the subdifferentials of the ℓ1 and
+nuclear norms, suggests the following high-level proof strategy: considering
+the solution (S̃, L̃) of the variety-constrained problem, we show under suitable conditions that the second part of the subgradient optimality conditions
+of (1.2) (without any variety constraints) corresponding to components in
+
+24
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+the normal spaces Ω(S̃)⊥ and T (L̃)⊥ is also satisfied by (S̃, L̃). Thus, we
+show that (S̃, L̃) satisfies the optimality conditions of the original convex
+program (1.2). Consequently (S̃, L̃) is also the optimum of the convex program (1.2). As this estimate is obtained as the solution to the problem
+with the variety constraints, the algebraic correctness of (S̃, L̃) can be directly concluded. We emphasize here that the variety-constrained optimization problem is used solely as an analysis tool in order to prove consistency
+of the estimates provided by the convex program (1.2). The key technical
+complication is that the tangent spaces at L̃ and L∗ are in general different.
+We bound the twisting between these tangent spaces by using the fact that
+the minimum nonzero singular value of L∗ is bounded away from zero (as
+assumed in Theorem 4.1; see also the supplement [6]).
+5.3. Results proved in supplement. In this section we give the statements
+of some results that are proved in a separate supplement [6]. These results
+are critical to the proof of our main theorem, but they deal mainly with nonstatistical aspects such as the curvature of the algebraic variety of low-rank
+matrices. Recall that Ω = Ω(S ∗ ) and T = T (L∗ ). We also refer frequently to
+the constants defined in Theorem 4.1.
+As the gradient of the log-determinant function is given by a matrix inverse, a key step in analyzing the properties of the convex program (1.2) is
+to show that the change in the inverse of a matrix due to small perturbations
+is well-approximated by the first-order term in the Taylor series expansion.
+Consider the Taylor series of the inverse of a matrix:
+(M + ∆)−1 = M −1 − M −1 ∆M −1 + RM −1 (∆),
+where
+RM −1 (∆) = M
+
+−1
+
+"∞
+X
+k=2
+
+(−∆M
+
+−1 k
+
+)
+
+#
+
+.
+
+This infinite sum converges for ∆ sufficiently small. The following proposition provides a bound on the second-order term specialized to our setting:
+Proposition 5.1. Suppose that γ is in the range given by Proposition 3.3. Further suppose ∆S ∈ Ω, and let gγ (∆S , ∆L ) ≤ 2C1 1 . Then we have
+that
+2DψC12 gγ (∆S , ∆L )2
+.
+gγ (A† RΣ∗O (A(∆S , ∆L ))) ≤
+ξ(T )
+Next we analyze the following convex program subject to certain additional constraints:
+(ŜΩ , L̂T̃ ) = arg min tr[(S − L)ΣnO ] − log det(S − L) + λn [γkSk1 + kLk∗ ]
+(5.2)
+
+S,L
+
+s.t. S − L ≻ 0, S ∈ Ω, L ∈ T̃ ,
+
+LATENT VARIABLE MODEL SELECTION
+
+25
+
+for some subspace T̃ . Comparing (5.2) with the convex program (1.2), we
+also do not constrain the variable L to be positive semidefinite in (5.2) for
+ease of proof of the next result (see the supplement [6] for more details; recall
+that the nuclear norm of a positive-semidefinite matrix is equal to its trace).
+We show that if T̃ is any tangent space to the low-rank matrix variety such
+)
+∗
+∗
+that ρ(T, T̃ ) ≤ ξ(T
+2 , then we can bound the error (∆S , ∆L ) = (ŜΩ − S , L −
+L̂T̃ ). Let CT̃ = PT̃ ⊥ (L∗ ) denote the normal component of the true low-rank
+matrix at T̃ , and let En = ΣnO − Σ∗O denote the difference between the true
+marginal covariance and the sample covariance. The proof of the following
+result uses Brouwer’s fixed-point theorem [25], and is inspired by the proof of
+a similar result in [26] for standard sparse graphical model recovery without
+latent variables.
+Proposition 5.2. Let the error (∆S , ∆L ) in the solution of the convex
+)
+program (5.2) [with T̃ such that ρ(T̃ , T ) ≤ ξ(T
+2 ] be as defined above, and
+define
+
+
+8
+†
+† ∗
+[gγ (A En ) + gγ (A I CT̃ ) + λn ], kCT ′ k2 .
+r = max
+α
+αξ(T )
+If r ≤ min{ 4C1 1 , 64DψC
+2 } for γ as in Proposition 3.3, then gγ (∆S , ∆L ) ≤ 2r.
+1
+
+Finally we give a proposition that summarizes the algebraic component
+of our proof.
+Proposition 5.3. Assume that γ is in the range specified by Proposiλn ν
+1
+L λn
+S λn
+tion 3.3, σ ≥ C
+, gγ (A† En ) ≤ 6(2−ν)
+, and that λn ≤ 3α(2−ν)
+, θ ≥ Cµ(Ω)
+16(3−ν) min{ 4C1 ,
+ξ(T )2
+αξ(T )
+}. Then there exists a T ′ and a corresponding unique solution (ŜΩ , L̂T ′ )
+64DψC12
+of (5.2) with T̃ = T ′ with the following properties:
+
+(1) sign(ŜΩ ) = sign(S ∗ ) and rank(L̂T ′ ) = rank(L∗ ), with L̂T ′  0. Further
+)
+T (L̂T ′ ) = T ′ and ρ(T, T ′ ) ≤ ξ(T
+4 .
+λn ν
+, and that
+(2) Letting CT ′ = PT ′⊥ (L∗ ) we have that gγ (A† I ∗ CT ′ ) ≤ 6(2−ν)
+n
+kCT ′ k2 ≤ 16(3−ν)λ
+3α(2−ν) .
+
+λn ν
+Further, if gγ (A† RΣ∗O (A(ŜΩ − S ∗ , L∗ − L̂T ′ ))) ≤ 6(2−ν)
+, then the tangent
+′
+space constraints S ∈ Ω, L ∈ T are inactive in (5.2). Consequently the unique
+solution of (1.2) is (Ŝn , L̂n ) = (ŜΩ , L̂T ′ ).
+
+5.4. Probabilistic analysis. The results given thus far in this section have
+been completely deterministic in nature. Here we present the probabilistic
+component of our proof by studying the rate at which the sample covariance
+matrix ΣnO converges to the true covariance matrix Σ∗O in spectral norm. This
+
+26
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+result is well known and follows directly from Theorem II.13 in [8]; we mainly
+discuss it here for completeness and also to show explicitly the dependence
+on ψ = kΣ∗O k2 defined in (3.4). See the supplement [6] for a proof.
+Lemma 5.4. Let ψ = kΣ∗O k2 . Given any δ > 0 with δ ≤ 8ψ, let the num2
+ber of samples n be such that n ≥ 64pψ
+. Then we have that
+δ2
+
+
+nδ2
+n
+∗
+Pr[kΣO − ΣO k2 ≥ δ] ≤ 2 exp −
+.
+128ψ 2
+The following corollary relates the number of samples required for an error
+bound to hold with probability 1 − 2 exp{−p}.
+Corollary 5.5.
+
+Let ΣnO be the sample
+q covariance formed from n sam-
+
+ples of the observed variables. Set δn =
+
+128pψ2
+. If n ≥ 2p, then
+n
+
+Pr[kΣnO − Σ∗O k2 ≤ δn ] ≥ 1 − 2 exp{−p}.
+
+Proof. Note that n ≥ 2p implies that δn ≤ 8ψ, and apply Lemma 5.4. 
+5.5. Proof of Theorem 4.1 and Corollary 4.3. We first combine the ren
+∗
+sults
+q obtained thus far to prove Theorem 4.1. Set En = ΣO − ΣO , set δn =
+128pψ2
+n (2−ν)
+, and then set λn = 6Dδξ(T
+. This setting of λn is equivalent to
+n
+)ν
+the specification in the statement of Theorem 4.1.
+Proof of Theorem 4.1. We mainly need to show that the various sufficient conditions of Proposition 5.3 are satisfied. We condition on the event
+that kEn k2 ≤ δn , which holds with probability greater than 1 − 2 exp{−p}
+from Corollary 5.5 as n ≥ 2p by assumption. Based on the bound on n, we
+also have that
+
+
+
+αν
+1
+αν
+2
+δn ≤ ξ(T )
+.
+min
+,
+32(3 − ν)D
+4C1 256D(3 − ν)ψC12
+
+In particular, these bounds imply that
+
+(5.3)
+
+
+
+αξ(T )ν
+1
+αξ(T )
+;
+δn ≤
+min
+,
+32(3 − ν)D
+4C1 64DψC12
+δn ≤
+
+α2 ξ(T )2 ν 2
+.
+8192ψC12 (3 − ν)2 D 2
+
+Both these weaker bounds are used later.
+Based on the assumptions of Theorem 4.1, the requirements of Proposition 5.3 on σ and θ are satisfied. Next we verify the bounds on λn and
+gγ (A† En ). Based on the setting of λn above and the bound on δn from (5.3),
+
+LATENT VARIABLE MODEL SELECTION
+
+27
+
+we have that
+
+
+1
+αξ(T )
+6D(2 − ν)δn 3α(2 − ν)
+≤
+min
+,
+.
+λn =
+ξ(T )ν
+16(3 − ν)
+4C1 64DψC12
+n (2−ν)
+Next we combine the facts that λn = 6Dδξ(T
+and that kEn k2 ≤ δn to
+)ν
+conclude that
+Dδn
+λn ν
+gγ (A† En ) ≤
+(5.4)
+=
+.
+ξ(T ) 6(2 − ν)
+
+Thus, we have from Proposition 5.3 that there exists a T ′ and corresponding solution (ŜΩ , L̂T ′ ) of (5.2) with the prescribed properties. Next we apply
+Proposition 5.2 with T̃ = T ′ to bound the error (ŜΩ − S ∗ , L∗ − L̂T ′ ). Noting
+)
+that ρ(T, T ′ ) ≤ ξ(T
+4 , we have that
+
+
+ν
+8
+8
+†
+† ∗
+[gγ (A En ) + gγ (A I CT ′ ) + λn ] ≤
++ 1 λn
+α
+α 3(2 − ν)
+(5.5)
+(5.6)
+(5.7)
+
+=
+
+16(3 − ν)λn
+3α(2 − ν)
+
+32(3 − ν)D
+δn
+αξ(T )ν
+
+
+1
+αξ(T )
+.
+≤ min
+,
+4C1 64DψC12
+=
+
+λn ν
+In the first inequality we used the fact that gγ (A† En ) ≤ 6(2−ν)
+(from above)
+†
+∗
+and that gγ (A I CT ′ ) is similarly bounded (from Proposition 5.3). In the
+n (2−ν)
+second equality we used the relation λn = 6Dδξ(T
+. In the final inequality
+)ν
+we used the bound on δn from (5.3). This satisfies one of the requirements of
+Proposition 5.2. The second requirement of Proposition 5.2 on kCT ′ k2 is also
+n
+similarly satisfied as we have that kCT ′ k2 ≤ 16(3−ν)λ
+3α(2−ν) from Proposition 5.3,
+and we use the same sequence of inequalities as above. Thus we conclude
+from Proposition 5.2 and from (5.5) that
+r
+1
+p
+32(3 − ν)λn
+∗
+∗
+(5.8)
+.
+.
+gγ (ŜΩ − S , L − L̂T ′ ) ≤
+3α(2 − ν)
+ξ(T ) n
+
+Here the last inequality follows from the bound on λn .
+If we show that (Ŝn , L̂n ) = (ŜΩ , L̂T ′ ), we can conclude the proof of Theorem 4.1 since algebraic correctness of (ŜΩ , L̂T ′ ) holds from Proposition 5.3
+and the estimation error bound follows from (5.8). In order to complete this
+final step, we again revert to Proposition 5.3 and prove the requisite bound
+on gγ (A† RΣ∗O (A(ŜΩ − S ∗ , L∗ − L̂T ′ ))).
+
+28
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+Since the bound (5.8) combined with the inequality (5.7) satisfies the
+condition of Proposition 5.1 [i.e., we have that gγ (ŜΩ − S ∗ , L∗ − L̂T ′ ) ≤ 2C1 1 ]:
+2DψC12
+gγ (ŜΩ − S ∗ , L∗ − L̂T ′ )2
+ξ(T )
+
+
+2DψC12 64(3 − ν)D 2 2
+≤
+δn
+ξ(T )
+αξ(T )ν
+
+
+Dδn
+8192ψC12 (3 − ν)2 D 2
+δ
+=
+n
+α2 ξ(T )2 ν 2
+ξ(T )
+
+gγ (A† RΣ∗O (A(ŜΩ − S ∗ , L∗ − L̂T ′ ))) ≤
+
+≤
+
+Dδn
+ξ(T )
+
+λn ν
+.
+6(2 − ν)
+In the second inequality we used (5.6) and (5.8), in the final inequality we
+used the bound (5.3) on δn , and in the final equality we used the relation
+n (2−ν)
+λn = 6Dδξ(T
+. 
+)ν
+=
+
+Proof of Corollary 4.3. Based on the optimality conditions of the
+modified convex program (5.2), we have that
+gγ (A† [(Ŝn − L̂n )−1 − ΣnO ]) ≤ λn .
+Combining this with the bound (5.4) yields the desired result. 
+6. Simulation results. In this section we give experimental demonstration of the consistency of our estimator (1.2) on synthetic examples, and its
+effectiveness in modeling real-world stock return data. Our choices of λn and
+γ are
+q guided by Theorem 4.1. Specifically, we choose λn to be proportional
+to np . For γ we observe that the support/sign-pattern and the rank of the
+solution (Ŝn , L̂n ) are the same for a range of values of γ. Therefore one could
+solve the convex program (1.2) for several values of γ, and choose a solution
+in a suitable range in which the sign-pattern and rank of the solution are
+stable (see [7] for details). In practical problems with real-world data these
+parameters may be chosen via cross-validation (it would be of interest to consider methods such as those developed in [24]). For small problem instances
+we solve the convex program (1.2) using a combination of YALMIP [21] and
+SDPT3 [31]. For larger problem instances we use the special-purpose solver
+LogdetPPA [33] developed for log-determinant semidefinite programs.
+
+6.1. Synthetic data. In the first set of experiments we consider a setting in which we have access to samples of the observed variables of a
+latent-variable graphical model. We consider several latent-variable Gaus-
+
+LATENT VARIABLE MODEL SELECTION
+
+29
+
+Fig. 1. Synthetic data: plot showing probability of algebraically correct estimation. The
+three models studied are (a) 36-node conditional graphical model given by a cycle with h = 2
+latent variables, (b) 36-node conditional graphical model given by a cycle with h = 3 latent
+variables and (c) 36-node conditional graphical model given by a 6 × 6 grid with h = 1
+latent variable. For each plotted point, the probability of algebraically correct estimation is
+obtained over 50 random trials.
+
+sian graphical models. The first model consists of p = 36 observed variables
+and h = 2 latent variables. The conditional graphical model structure of the
+observed variables is a cycle with the edge partial correlation coefficients
+equal to 0.25; thus, this conditional model is specified by a sparse graphical
+model with degree 2. The second model is the same as the first one, but with
+h = 3 latent variables. The third model consists of h = 1 latent variable, and
+the conditional graphical model structure of the observed variables is given
+by a 6 × 6 nearest-neighbor grid (i.e., p = 36 and degree 4) with the partial correlation coefficients of the edges equal to 0.15. In all three of these
+models each latent variable is connected to a random subset of 80% of the
+observed variables (and the partial correlation coefficients corresponding to
+these edges are also random). Therefore the effect of the latent variables
+is “spread out” over most of the observed variables, that is, the low-rank
+matrix summarizing the effect of the latent variables is incoherent.
+For each model we generate n samples of the observed variables, and use
+the resulting sample covariance ΣnO as input to our convex program (1.2).
+Figure 1 shows the probability of obtaining algebraically correct estimates
+as a function of n. This probability is evaluated over 50 experiments for each
+value of n. In all of these cases standard graphical model selection applied
+directly to the observed variables is not useful as the marginal concentration
+matrix of the observed variables is not well-approximated by a sparse matrix. These experiments agree with our theoretical results that the convex
+
+30
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+Fig. 2. Stock returns: the figure on the left shows the sparsity pattern (black denotes an
+edge, and white denotes no edge) of the concentration matrix of the conditional graphical
+model (135 edges) of the stock returns, conditioned on five latent variables, in a latent–
+variable graphical model (total number of parameters equals 639). This model is learned
+using (1.2), and the KL divergence with respect to a Gaussian distribution specified by the
+sample covariance is 17.7. The figure on the right shows the concentration matrix of the
+graphical model (646 edges) of the stock returns, learned using standard sparse graphical
+model selection based on solving an ℓ1 -regularized maximum-likelihood program (total number of parameters equals 730). The KL divergence between this distribution and a Gaussian
+distribution specified by the sample covariance is 44.4.
+
+program (1.2) is an algebraically consistent estimator of a latent-variable
+model given (sufficiently many) samples of only the observed variables.
+6.2. Stock return data. In the next experiment we model the statistical
+structure of monthly stock returns of 84 companies in the S&P 100 index
+from 1990 to 2007; we disregard 16 companies that were listed after 1990.
+The number of samples n is equal to 216. We compute the sample covariance
+based on these returns and use this as input to (1.2).
+The model learned using (1.2) for suitable values of λn , γ consists of h = 5
+latent variables, and the conditional graphical model structure of the stock
+returns conditioned on these latent components consists of 135 edges. Therefore the number of parameters in the model is 84 + 135 + (5 × 84) = 639.
+The resulting KL divergence between the distribution specified by this model
+and a Gaussian distribution specified by the sample covariance is 17.7. Figure 2 (left) shows the conditional graphical model structure. The strongest
+edges in this conditional graphical model, as measured by partial correlation, are between Baker Hughes–Schlumberger, A.T.&T.–Verizon, Merrill Lynch–Morgan Stanley, Halliburton–Baker Hughes, Intel–Texas Instruments, Apple–Dell, and Microsoft–Dell. It is of interest to note that in the
+Standard Industrial Classification4 system for grouping these companies,
+several of these pairs are in different classes. As mentioned in Section 2.1,
+our method estimates a low-rank matrix that summarizes the effect of the
+latent variables; in order to factorize this low-rank matrix, for example, into
+sparse factors, one could use methods such as those described in [35].
+4
+
+See the U.S. SEC website at http://www.sec.gov/info/edgar/siccodes.htm.
+
+LATENT VARIABLE MODEL SELECTION
+
+31
+
+We compare these results to those obtained using a sparse graphical model
+learned using ℓ1 -regularized maximum-likelihood (see, e.g., [26]), without
+introducing any latent variables. Figure 2 (right) shows this graphical model
+structure. The number of edges in this model is 646 (the total number of
+parameters is equal to 646 + 84 = 730), and the resulting KL divergence
+between this distribution and a Gaussian distribution specified by the sample
+covariance is 44.4.
+These results suggest that a latent-variable graphical model is better
+suited than a standard sparse graphical model for modeling stock returns.
+This is likely due to the presence of global, long-range correlations in stock
+return data that are better modeled via latent variables.
+7. Discussion. We have studied the problem of modeling the statistical
+structure of a collection of random variables as a sparse graphical model conditioned on a few additional latent components. As a first contribution we
+described conditions under which such latent-variable graphical models are
+identifiable given samples of only the observed variables. We also proposed
+a convex program based on ℓ1 and nuclear norm regularized maximumlikelihood for latent-variable graphical model selection. Given samples of
+the observed variables of a latent-variable Gaussian model, we proved that
+this convex program provides consistent estimates of the number of latent
+components as well as the conditional graphical model structure among the
+observed variables conditioned on the latent components. Our analysis holds
+in the high-dimensional regime in which the number of observed/latent variables are allowed to grow with the number of samples of the observed variables. These theoretical predictions are verified via a set of experiments on
+synthetic data. We also demonstrate the effectiveness of our approach in
+modeling real-world stock return data.
+Several questions arise that are worthy of further investigation. While (1.2)
+can be solved in polynomial time using off-the-shelf solvers, it is preferable
+to develop more efficient special-purpose solvers to scale to massive datasets
+by taking advantage of the structure of (1.2). It is also of interest to develop
+statistically consistent convex optimization methods for latent-variable modeling with non-Gaussian variables, for example, for categorical data.
+Acknowledgments. We would like to thank James Saunderson and Myung
+Jin Choi for helpful discussions, and Kim-Chuan Toh for kindly providing
+us specialized code to solve larger instances of our convex program.
+SUPPLEMENTARY MATERIAL
+Supplement to “Latent variable graphical model selection via convex optimization” (DOI: 10.1214/11-AOS949SUPP; .pdf). Due to space constraints,
+we have moved some technical proofs to a supplementary document [6].
+
+32
+
+V. CHANDRASEKARAN, P. A. PARRILO AND A. S. WILLSKY
+
+REFERENCES
+[1] Bickel, P. J. and Levina, E. (2008). Regularized estimation of large covariance
+matrices. Ann. Statist. 36 199–227. MR2387969
+[2] Bickel, P. J. and Levina, E. (2008). Covariance regularization by thresholding.
+Ann. Statist. 36 2577–2604. MR2485008
+[3] Candès, E. J., Li, X., Ma, Y. and Wright, J. (2011). Robust principal component
+analysis? J. ACM 58 Art. 11, 37. MR2811000
+[4] Candès, E. J. and Recht, B. (2009). Exact matrix completion via convex optimization. Found. Comput. Math. 9 717–772. MR2565240
+[5] Candès, E. J., Romberg, J. and Tao, T. (2006). Robust uncertainty principles:
+Exact signal reconstruction from highly incomplete frequency information. IEEE
+Trans. Inform. Theory 52 489–509. MR2236170
+[6] Chandrasekaran, V., Parrilo, P. A. and Willsky, A. S. (2011). Supplement to “Latent variable graphical model selection via convex optimization.”
+DOI:10.1214/11-AOS949SUPP.
+[7] Chandrasekaran, V., Sanghavi, S., Parrilo, P. A. and Willsky, A. S. (2011).
+Rank-sparsity incoherence for matrix decomposition. SIAM J. Optim. 21 572–
+596. MR2817479
+[8] Davidson, K. R. and Szarek, S. J. (2001). Local operator theory, random matrices
+and Banach spaces. In Handbook of the Geometry of Banach Spaces, Vol. I 317–
+366. North-Holland, Amsterdam. MR1863696
+[9] Dempster, A. P., Laird, N. M. and Rubin, D. B. (1977). Maximum likelihood from
+incomplete data via the EM algorithm. J. Roy. Statist. Soc. Ser. B 39 1–38.
+[10] Donoho, D. L. (2006). For most large underdetermined systems of linear equations
+the minimal l1 -norm solution is also the sparsest solution. Comm. Pure Appl.
+Math. 59 797–829. MR2217606
+[11] Donoho, D. L. (2006). Compressed sensing. IEEE Trans. Inform. Theory 52 1289–
+1306. MR2241189
+[12] El Karoui, N. (2008). Operator norm consistent estimation of large-dimensional
+sparse covariance matrices. Ann. Statist. 36 2717–2756. MR2485011
+[13] Elidan, G., Nachman, I. and Friedman, N. (2007). “Ideal parent” structure learning for continuous variable Bayesian networks. J. Mach. Learn. Res. 8 1799–1833.
+MR2353820
+[14] Fan, J., Fan, Y. and Lv, J. (2008). High dimensional covariance matrix estimation
+using a factor model. J. Econometrics 147 186–197. MR2472991
+[15] Fazel, M. (2002). Matrix rank minimization with applications. Ph.D. thesis, Dept.
+Elec. Eng., Stanford Univ.
+[16] Horn, R. A. and Johnson, C. R. (1990). Matrix Analysis. Cambridge Univ. Press,
+Cambridge. MR1084815
+[17] Johnstone, I. M. (2001). On the distribution of the largest eigenvalue in principal
+components analysis. Ann. Statist. 29 295–327. MR1863961
+[18] Lam, C. and Fan, J. (2009). Sparsistency and rates of convergence in large covariance
+matrix estimation. Ann. Statist. 37 4254–4278. MR2572459
+[19] Lauritzen, S. L. (1996). Graphical Models. Oxford Statistical Science Series 17.
+Oxford Univ. Press, New York. MR1419991
+[20] Ledoit, O. and Wolf, M. (2004). A well-conditioned estimator for large-dimensional
+covariance matrices. J. Multivariate Anal. 88 365–411. MR2026339
+[21] Löfberg, J. (2004). YALMIP: A toolbox for modeling and optimization in
+MATLAB. In Proceedings of the CACSD Conference, Taiwan. Available at
+http://control.ee.ethz.ch/~ joloef/yalmip.php.
+
+LATENT VARIABLE MODEL SELECTION
+
+33
+
+[22] Marčenko, V. A. and Pastur, L. A. (1967). Distribution of eigenvalues in certain
+sets of random matrices. Mat. Sb. 72 507–536. MR0208649
+[23] Meinshausen, N. and Bühlmann, P. (2006). High-dimensional graphs and variable
+selection with the lasso. Ann. Statist. 34 1436–1462. MR2278363
+[24] Meinshausen, N. and Bühlmann, P. (2010). Stability selection. J. R. Stat. Soc.
+Ser. B Stat. Methodol. 72 417–473. MR2758523
+[25] Ortega, J. M. and Rheinboldt, W. C. (1970). Iterative Solution of Nonlinear
+Equations in Several Variables. Academic Press, New York. MR0273810
+[26] Ravikumar, P., Wainwright, M. J., Raskutti, G. and Yu, B. (2011). Highdimensional covariance estimation by minimizing ℓ1 -penalized log-determinant
+divergence. Electron. J. Stat. 4 935–980.
+[27] Recht, B., Fazel, M. and Parrilo, P. A. (2010). Guaranteed minimum-rank solutions of linear matrix equations via nuclear norm minimization. SIAM Rev. 52
+471–501. MR2680543
+[28] Rockafellar, R. T. (1996). Convex Analysis. Princeton Univ. Press, Princeton,
+NJ. MR1451876
+[29] Rothman, A. J., Bickel, P. J., Levina, E. and Zhu, J. (2008). Sparse permutation
+invariant covariance estimation. Electron. J. Stat. 2 494–515. MR2417391
+[30] Speed, T. P. and Kiiveri, H. T. (1986). Gaussian Markov distributions over finite
+graphs. Ann. Statist. 14 138–150. MR0829559
+[31] Toh, K. C., Todd, M. J. and Tutuncu, R. H. (1999). SDPT3—a MATLAB
+software package for semidefinite-quadratic-linear programming. Available at
+http://www.math.nus.edu.sg/~ mattohkc/sdpt3.html.
+[32] Wainwright, M. J. (2009). Sharp thresholds for high-dimensional and noisy sparsity recovery using ℓ1 -constrained quadratic programming (Lasso). IEEE Trans.
+Inform. Theory 55 2183–2202. MR2729873
+[33] Wang, C., Sun, D. and Toh, K.-C. (2010). Solving log-determinant optimization
+problems by a Newton-CG primal proximal point algorithm. SIAM J. Optim.
+20 2994–3013. MR2735941
+[34] Watson, G. A. (1992). Characterization of the subdifferential of some matrix norms.
+Linear Algebra Appl. 170 33–45. MR1160950
+[35] Witten, D. M., Tibshirani, R. and Hastie, T. (2009). A penalized matrix decomposition, with applications to sparse principal components and canonical
+correlation analysis. Biostatistics 10 515–534.
+[36] Wu, W. B. and Pourahmadi, M. (2003). Nonparametric estimation of large covariance matrices of longitudinal data. Biometrika 90 831–844. MR2024760
+[37] Zhao, P. and Yu, B. (2006). On model selection consistency of Lasso. J. Mach.
+Learn. Res. 7 2541–2563. MR2274449
+V. Chandrasekaran
+Department of Computing
+and Mathematical Sciences
+California Institute of Technology
+Pasadena, California 91106
+USA
+E-mail: venkatc@caltech.edu
+
+P. A. Parrilo
+A. S. Willsky
+Laboratory for Information
+and Decision Systems
+Department of Electrical Engineering
+and Computer Science
+Massachusetts Institute of Technology
+Cambridge, Massachusetts 02139
+USA
+E-mail: parrilo@mit.edu
+willsky@mit.edu
+
+

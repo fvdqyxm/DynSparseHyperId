@@ -1,0 +1,37 @@
+{
+  "status": "ok",
+  "note": "Static baseline now computed from real static feature models (no proxy).",
+  "dynamic_model": {
+    "cv_mse": 0.12424343095990736,
+    "cv_r2": -0.31256453175816445
+  },
+  "static_baselines": [
+    {
+      "name": "static_ridge",
+      "cv_mse": 0.12630138451230633,
+      "cv_r2": -0.3343056960194464,
+      "n_features": 100
+    },
+    {
+      "name": "static_pca_ridge",
+      "cv_mse": 0.12630138451230635,
+      "cv_r2": -0.3343056960194466,
+      "n_features": 7
+    },
+    {
+      "name": "intercept_only",
+      "cv_mse": 0.12361463062039285,
+      "cv_r2": -0.3059215968615052,
+      "n_features": 1
+    }
+  ],
+  "best_static_baseline": {
+    "name": "intercept_only",
+    "cv_mse": 0.12361463062039285,
+    "cv_r2": -0.3059215968615052,
+    "n_features": 1
+  },
+  "relative_mse_lift_vs_best_static": -0.0050867792619588076,
+  "n_subjects": 8,
+  "folds": 5
+}

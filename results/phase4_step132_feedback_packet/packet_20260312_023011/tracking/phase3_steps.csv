@@ -1,0 +1,10 @@
+Step #,Description,Status,Date Completed,Notes/Results,Contingency Triggered? (Y/N + details)
+68,Download/preprocess Marijuana-323 rs-fMRI (Yeo 17 atlas motion/physio regression),Blocked,,Created Step68 BIDS intake+preflight script with manifest/report outputs; status blocked_missing_data_root due absent local dataset,Y + external dataset unavailable in local workspace
+69,Compute dynamic sliding windows as model input,Blocked,,Step69 windowing pipeline implemented; status blocked_missing_manifest because Step68 cannot materialize manifest without data root,Y + upstream external dataset dependency
+70,Infer time-varying motifs and correlate destabilization with craving variance,Blocked,,Step70 motif/correlation pipeline implemented; status blocked_missing_window_files,Y + upstream blocked by missing real-data windows
+71,Predict craving instability from dwell/motif variance,Blocked,,Step71 CV prediction pipeline implemented; status blocked_missing_step70_artifacts,Y + upstream blocked
+72,Compare prediction performance to static HOGANN + linear regression,Blocked,,Step72 baseline pipeline implemented; status blocked_upstream_not_ready,Y + upstream blocked
+73,Visualize recovered motifs (network plots),Blocked,,Step73 visualization pipeline implemented; status blocked_missing_step70_outputs,Y + upstream blocked
+74,Cross-dataset check (ABCD SUD subset if accessible),Blocked,,Step74 cross-dataset preflight implemented; status blocked_missing_dataset_root for local ABCD subset,Y + external dataset unavailable in local workspace
+75,Ablate high-order vs pairwise in neuroscience setting,Blocked,,Step75 ablation pipeline implemented; status blocked_missing_step70_artifacts,Y + upstream blocked
+76,Viability Gate 3: biological plausibility and narrative fit,Blocked,,Gate logic script implemented but blocked_by_data with explicit upstream map in results/phase3_step76_gate3/metrics_summary.json,Y + real-data phase cannot run without local datasets

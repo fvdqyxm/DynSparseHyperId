@@ -1,0 +1,115 @@
+{
+  "seed": 17,
+  "n": 10,
+  "t": 2400,
+  "dt": 0.05,
+  "tr": 0.8,
+  "edge_prob": 0.1,
+  "support_threshold_structural": 0.05,
+  "support_threshold_effective": 0.0005,
+  "regime_support_hamming": 0.2,
+  "recovery_vs_structural_coupling": {
+    "neural_pairwise": {
+      "regime_0": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 10,
+        "tn": 80,
+        "samples_used": 1284
+      },
+      "regime_1": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 10,
+        "tn": 80,
+        "samples_used": 1115
+      },
+      "support_f1_mean": 0.0
+    },
+    "bold_pairwise": {
+      "regime_0": {
+        "precision": 0.1,
+        "recall": 0.1,
+        "f1": 0.10000000000000002,
+        "tp": 1,
+        "fp": 9,
+        "fn": 9,
+        "tn": 71,
+        "samples_used": 1284
+      },
+      "regime_1": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 13,
+        "fn": 10,
+        "tn": 67,
+        "samples_used": 1115
+      },
+      "support_f1_mean": 0.05000000000000001
+    }
+  },
+  "recovery_vs_effective_linearization": {
+    "neural_pairwise": {
+      "regime_0": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 11,
+        "fn": 8,
+        "tn": 71,
+        "samples_used": 1284
+      },
+      "regime_1": {
+        "precision": 0.05555555555555555,
+        "recall": 0.16666666666666666,
+        "f1": 0.08333333333333333,
+        "tp": 1,
+        "fp": 17,
+        "fn": 5,
+        "tn": 67,
+        "samples_used": 1115
+      },
+      "support_f1_mean": 0.041666666666666664
+    },
+    "bold_pairwise": {
+      "regime_0": {
+        "precision": 0.11764705882352941,
+        "recall": 0.5,
+        "f1": 0.19047619047619047,
+        "tp": 4,
+        "fp": 30,
+        "fn": 4,
+        "tn": 52,
+        "samples_used": 1284
+      },
+      "regime_1": {
+        "precision": 0.09090909090909091,
+        "recall": 0.5,
+        "f1": 0.15384615384615385,
+        "tp": 3,
+        "fp": 30,
+        "fn": 3,
+        "tn": 54,
+        "samples_used": 1115
+      },
+      "support_f1_mean": 0.17216117216117216
+    }
+  },
+  "dynamics_diagnostics": {
+    "mean_sigmoid_prime_regime_0": 0.0775191509293145,
+    "mean_sigmoid_prime_regime_1": 0.07449288130194864,
+    "effective_offdiag_abs_max_mean": 0.0007584981774933941,
+    "effective_offdiag_abs_mean_mean": 6.169810316064241e-05,
+    "low_observability_flag": true
+  },
+  "claim_guardrail": "Pairwise AR support on BOLD is a stress test only; low scores are expected when sigmoid derivatives are small and effective off-diagonal couplings are weak."
+}

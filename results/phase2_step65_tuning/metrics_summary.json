@@ -1,0 +1,107 @@
+{
+  "seed": 2301,
+  "learning_rate_tuning": {
+    "rows": [
+      {
+        "lr": 0.0003,
+        "final_val_loss": 1.1073111295700073,
+        "final_val_acc": 0.3382812440395355
+      },
+      {
+        "lr": 0.001,
+        "final_val_loss": 1.1076810359954834,
+        "final_val_acc": 0.3382812440395355
+      },
+      {
+        "lr": 0.003,
+        "final_val_loss": 1.1282384395599365,
+        "final_val_acc": 0.3257812559604645
+      }
+    ],
+    "best": {
+      "lr": 0.0003,
+      "final_val_loss": 1.1073111295700073,
+      "final_val_acc": 0.3382812440395355
+    }
+  },
+  "lambda_tuning": {
+    "rows": [
+      {
+        "lambda_alpha_scale": 0.15,
+        "support_f1": 0.9067796610164508,
+        "val_mse": 0.12926782562845976
+      },
+      {
+        "lambda_alpha_scale": 0.25,
+        "support_f1": 0.8831168831163873,
+        "val_mse": 0.12911711841906615
+      },
+      {
+        "lambda_alpha_scale": 0.35,
+        "support_f1": 0.8733624454143525,
+        "val_mse": 0.1314431684397916
+      },
+      {
+        "lambda_alpha_scale": 0.5,
+        "support_f1": 0.8430493273537698,
+        "val_mse": 0.1379446653947137
+      },
+      {
+        "lambda_alpha_scale": 0.7,
+        "support_f1": 0.8055555555550719,
+        "val_mse": 0.15087421327267092
+      }
+    ],
+    "best": {
+      "lambda_alpha_scale": 0.25,
+      "support_f1": 0.8831168831163873,
+      "val_mse": 0.12911711841906615
+    }
+  },
+  "beta_tuning": {
+    "rows": [
+      {
+        "beta_smoothness": 0.01,
+        "recon_mse": 0.02191044369219083,
+        "temporal_kl_penalty": 0.5705400631593106,
+        "val_obj": 0.02248098375535014
+      },
+      {
+        "beta_smoothness": 0.03,
+        "recon_mse": 0.02105068718757007,
+        "temporal_kl_penalty": 1.617083360260694,
+        "val_obj": 0.022667770547830764
+      },
+      {
+        "beta_smoothness": 0.1,
+        "recon_mse": 0.018548115331795362,
+        "temporal_kl_penalty": 4.479119553697981,
+        "val_obj": 0.023027234885493342
+      },
+      {
+        "beta_smoothness": 0.3,
+        "recon_mse": 0.01412607604004998,
+        "temporal_kl_penalty": 8.658544208983225,
+        "val_obj": 0.022784620249033206
+      },
+      {
+        "beta_smoothness": 1.0,
+        "recon_mse": 0.009395058826592044,
+        "temporal_kl_penalty": 10.679027997202514,
+        "val_obj": 0.02007408682379456
+      }
+    ],
+    "best": {
+      "beta_smoothness": 1.0,
+      "recon_mse": 0.009395058826592044,
+      "temporal_kl_penalty": 10.679027997202514,
+      "val_obj": 0.02007408682379456
+    }
+  },
+  "recommended": {
+    "lr": 0.0003,
+    "lambda_alpha_scale": 0.25,
+    "beta_smoothness": 1.0
+  },
+  "note": "Step-65 tuning uses executable proxies; full end-to-end joint tuning remains future work."
+}

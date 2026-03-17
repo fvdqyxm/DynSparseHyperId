@@ -1,0 +1,18 @@
+{
+  "all_passed": true,
+  "checks": {
+    "matrix_structure": {
+      "passed": true,
+      "issues": [],
+      "count": 6
+    },
+    "assumption_note": {
+      "passed": true,
+      "issues": []
+    },
+    "latex_alignment": {
+      "passed": true,
+      "issues": []
+    }
+  }
+}

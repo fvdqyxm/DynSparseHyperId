@@ -1,0 +1,6 @@
+{
+  "status": "blocked_missing_step70_artifacts",
+  "issues": [
+    "Missing one or more Step70 artifacts: results/phase3_step70_motifs/metrics_summary.json, results/phase3_step70_motifs/motif_scores.npy, results/phase3_step70_motifs/subject_craving.npy"
+  ]
+}

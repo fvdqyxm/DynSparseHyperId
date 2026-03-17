@@ -1,0 +1,8 @@
+{
+  "seed": 704,
+  "time_steps": 20,
+  "dim": 32,
+  "beta": 0.1,
+  "penalty_random": 10.65322487957951,
+  "penalty_identical": 0.0
+}

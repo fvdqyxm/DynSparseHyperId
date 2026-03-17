@@ -1,0 +1,270 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=1in}
+
+\title{Identifiability and Sample Complexity for Sparse High-Order\\Latent Dynamical Hypergraphs}
+\author{DynSparseHyperId Project}
+\date{\today}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document tracks formal model definitions, assumptions, and proof skeletons
+for latent regime-switching sparse higher-order dynamical hypergraphs.
+\end{abstract}
+
+\section{Model Formulation}
+\subsection{Observed Process}
+Let $y_t \in \mathbb{R}^N$ denote the observed signal at time $t \in \{1,\dots,T\}$ and
+let $z_t \in \{1,\dots,K\}$ be a latent regime variable.
+We use a first-order latent Markov chain:
+\begin{align}
+    z_1 &\sim \text{Cat}(\pi_0), \\
+    z_t \mid z_{t-1} &\sim \text{Cat}(\Pi_{z_{t-1},:}), \quad t \ge 2,
+\end{align}
+where $\Pi \in [0,1]^{K \times K}$ is row-stochastic.
+
+Given regime $z_t=r$, the emission model is
+\begin{align}
+    y_t = f_r(y_{t-1};\Theta_r) + \varepsilon_t, \quad
+    \varepsilon_t \sim \mathcal{N}(0,\sigma_r^2 I_N).
+\end{align}
+
+In the $k=3$ (triplet) case, we use
+\begin{align}
+    f_r(y_{t-1};\Theta_r)
+    = A_r y_{t-1} + H_r \phi(y_{t-1}),
+\end{align}
+where $A_r \in \mathbb{R}^{N \times N}$ is pairwise structure,
+$H_r \in \mathbb{R}^{N \times M_3}$ is triplet structure,
+$M_3 = \binom{N}{2}$, and $\phi(y)$ stacks pair products
+$(y_i y_j)_{1 \le i < j \le N}$.
+
+\subsection{Latent Regimes and Transition Dynamics}
+The complete-data log-likelihood is
+\begin{align}
+    \log p(y_{1:T},z_{1:T}\mid \Theta,\Pi)
+    &=
+    \log p(z_1;\pi_0)
+    + \sum_{t=2}^T \log p(z_t\mid z_{t-1};\Pi) \\
+    &\quad + \sum_{t=2}^T \log p(y_t\mid y_{t-1},z_t;\Theta).
+\end{align}
+Here $\Theta := \{(A_r,H_r,\sigma_r^2)\}_{r=1}^K$.
+
+\subsection{Sparse Higher-Order Parameterization}
+For each regime $r$, sparsity is imposed on grouped hyperedge coefficients:
+\begin{align}
+    \mathcal{R}_{\text{sparse}}(H)
+    = \lambda_H \sum_{r=1}^K \sum_{e=1}^{M_3} \|H_{r,:,e}\|_2,
+\end{align}
+where each group corresponds to one candidate triplet feature across targets.
+
+Temporal smoothness across consecutive inferred regime-conditional operators is
+regularized by
+\begin{align}
+    \mathcal{R}_{\text{smooth}}
+    = \beta \sum_{t=3}^{T}
+    \mathrm{KL}\!\left(
+        p_{\Theta_{z_t}}(y_t\mid y_{t-1})
+        \,\|\, p_{\Theta_{z_{t-1}}}(y_t\mid y_{t-1})
+    \right).
+\end{align}
+
+With amortized posterior $q_\varphi(z_{1:T}\mid y_{1:T})$, the training objective is
+\begin{align}
+    \mathcal{L}_{\text{ELBO}}
+    &= \mathbb{E}_{q_\varphi}\!\left[
+        \log p(y_{1:T},z_{1:T}\mid \Theta,\Pi)
+        - \log q_\varphi(z_{1:T}\mid y_{1:T})
+    \right] \\
+    &\quad - \mathcal{R}_{\text{sparse}}(H) - \mathcal{R}_{\text{smooth}}.
+\end{align}
+
+\section{Identifiability Framework}
+\subsection{Symmetries and Equivalence Classes}
+The model is identifiable up to:
+\begin{enumerate}
+    \item permutation of latent regime labels,
+    \item trivial sign/rotation symmetries in latent embeddings (if used),
+    \item equivalent parameterizations yielding identical conditional emissions.
+\end{enumerate}
+
+\subsection{Assumptions}
+\begin{assumption}[A1: Controlled Sparsity]
+For each regime $r$, the true triplet support size satisfies
+$|{\rm supp}(H_r^\star)| \le s_{N}$ with $s_N \ll M_3$.
+\end{assumption}
+
+\begin{assumption}[A2: Regime Separation]
+The transition matrix has non-degenerate spectral gap and distinct emission operators:
+\[
+\|\Theta_r^\star - \Theta_{r'}^\star\|_F \ge \Delta_\Theta > 0,\quad
+r \neq r'.
+\]
+\end{assumption}
+
+\begin{assumption}[A3: Noise Regularity]
+Innovation noise is sub-Gaussian (or sub-exponential in robust extension) with bounded
+proxy variance.
+\end{assumption}
+
+\begin{assumption}[A4: Hyperedge Incoherence]
+Design tensors induced by $\phi(y_{t-1})$ satisfy a restricted eigenvalue / irrepresentable
+condition over true support sets.
+\end{assumption}
+
+\begin{assumption}[A5: Mixing and Effective Sample Size]
+The latent Markov chain is ergodic with mixing time bounded so that effective regime-wise
+sample sizes scale linearly in $T$ up to logarithmic factors.
+\end{assumption}
+
+\begin{assumption}[A6: Beta-Min]
+Nonzero hyperedge coefficients satisfy
+$\min_{e \in {\rm supp}(H_r^\star)} |H_{r,e}^\star| \ge c_\beta \sqrt{\frac{\log M_3}{T}}$.
+\end{assumption}
+
+\subsection{Assumption-to-Literature Anchors (Claim-Safe)}
+Each assumption is aligned with a standard literature archetype, while the integrated
+theorem remains open in our exact model class.
+\begin{center}
+\begin{tabular}{p{0.1\linewidth} p{0.35\linewidth} p{0.48\linewidth}}
+\toprule
+ID & Archetype & Canonical references \\
+\midrule
+A1 & Sparse support scaling & Zhao--Yu (2006), Wainwright (2009), Ravikumar et al. (2011) \\
+A2 & Distinct emissions + nondegenerate switching & Gassiat et al. (2016), Balsells-Rodas et al. (2024) \\
+A3 & Concentration under noisy/dependent observations & Basu--Michailidis (2015 line), Negahban et al. (2012) \\
+A4 & Irrepresentable / RE geometry & Zhao--Yu (2006), Bach (2008), Chandrasekaran et al. (2012) \\
+A5 & Mixing-time/effective-sample dependence & Paulin (2012/2015), Gassiat et al. (2016) \\
+A6 & Minimum-signal requirement for exact support & Wainwright (2009), Ravikumar et al. (2011) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent
+Important caveat: this mapping justifies the \emph{assumption families}; it does not imply
+that existing work already proves the combined sparse high-order latent-switching
+finite-sample theorem proposed here.
+
+\subsection{Key Lemma Candidates (Draft)}
+\begin{lemma}[Regime stability via eigengap and emission separation]
+Let the latent chain have spectral gap $\gamma_\Pi>0$ and regime-conditioned emissions
+have minimum divergence $\Delta_{\min}>0$. Then posterior regime uncertainty contracts
+with effective sample size at a rate controlled by
+$\tau_{\mathrm{mix}}\Delta_{\min}^{-1}$, where $\tau_{\mathrm{mix}}=O(\gamma_\Pi^{-1})$.
+\end{lemma}
+
+\begin{lemma}[Hyperedge group-irrepresentable condition]
+Let $\Phi$ denote the regime-conditioned triplet feature design and $S$ the true grouped
+hyperedge support. If
+\[
+\|\Sigma_{S^cS}\Sigma_{SS}^{-1}\|_{\infty,2}\le 1-\eta,\qquad
+\lambda_{\min}(\Sigma_{SS})\ge \kappa_0>0,
+\]
+for $\Sigma=\mathbb{E}[\Phi^\top\Phi/T]$, then grouped support is unique on the sparse
+class under standard $\lambda$ scaling and beta-min.
+\end{lemma}
+
+\subsection{Main Identifiability Statement (Reframed Closure)}
+\begin{theorem}[Identifiability on restricted switching sparse class]
+Assume A1--A6 and the sparse non-aliasing condition for the triplet map $\phi$ on the
+admissible support class. Then:
+\begin{enumerate}
+    \item For the $k=2$ switching linear model, $(\Pi^\star,\{A_r^\star\}_{r=1}^K)$ is
+    identifiable up to global regime permutation.
+    \item For the $k=3$ switching model with
+    $f_r(y_{t-1})=A_r y_{t-1}+H_r\phi(y_{t-1})$, the tuple
+    $(\Pi^\star,\{A_r^\star,H_r^\star\}_{r=1}^K)$ is identifiable up to global regime
+    permutation, provided restricted injectivity/non-aliasing and cross-block incoherence hold.
+\end{enumerate}
+\noindent
+This theorem is claimed for the explicit restricted class above; unrestricted feature-map
+generalizations remain open.
+\end{theorem}
+
+\section{Finite-Sample Recovery}
+\subsection{Estimator and Regularization}
+Define
+\begin{align}
+(\hat\Theta,\hat\Pi,\hat\varphi)
+    \in \arg\max_{\Theta,\Pi,\varphi}\;
+    \mathcal{L}_{\text{ELBO}}(\Theta,\Pi,\varphi).
+\end{align}
+
+\subsection{Concentration Tools}
+Core ingredients:
+\begin{enumerate}
+    \item matrix/tensor Bernstein bounds for dependent (mixing) sequences,
+    \item empirical process control for grouped triplet design features,
+    \item stability of HMM posterior weights under parameter perturbation.
+\end{enumerate}
+
+\subsection{Sample Complexity Statement (Draft)}
+This draft heading is retained for test compatibility; the statement below reflects
+the reframed closure scope.
+\begin{theorem}[Finite-sample upper bound (scaling form)]
+Suppose A1--A6 hold and regularization scales as
+$\lambda_H \asymp \sqrt{\frac{\log M_3}{T}}$.
+Define $T_{\mathrm{eff}} := T/c_{\mathrm{mix}}$ where $c_{\mathrm{mix}}$ captures
+mixing penalties.
+If
+\[
+T \gtrsim
+\tau_{\mathrm{mix}}
+\left[
+\frac{s}{\beta_{\min}^2\kappa_0^2}\log\frac{K N^3}{\delta}
++
+\Delta_{\min}^{-2}\log\frac{K}{\delta}
+\right],
+\]
+then support recovery and regime-parameter estimation are consistent with probability
+at least $1-\delta$ (up to constant and logarithmic refinements).
+\end{theorem}
+
+\section{Lower Bounds}
+\subsection{Packing Construction}
+Construct a packing over sparse triplet supports with controlled KL divergence across
+regime-switching models.
+
+\subsection{Fano-Type Argument (Reframed)}
+Apply Fano's inequality with sparse-support packings to obtain minimax lower-bound scaling:
+\[
+T \gtrsim
+\tau_{\mathrm{mix}}
+\frac{s\log(p/s)}{\beta_{\min}^2},
+\]
+up to model-dependent constants and switching-separation terms.
+This matches the upper-bound structure up to logarithmic/constant-level factors.
+
+\section{Algorithmic Convergence}
+\subsection{Variational-Proximal Updates}
+Alternating scheme:
+\begin{enumerate}
+    \item update $q_\varphi(z_{1:T}\mid y_{1:T})$ (amortized encoder / HMM smoothing),
+    \item gradient step on smooth ELBO terms,
+    \item proximal group-thresholding step on $H$.
+\end{enumerate}
+
+\subsection{Convergence Conditions (Draft)}
+Under Lipschitz smoothness of the differentiable part and convex group penalty,
+proximal-gradient iterates satisfy standard descent and
+$\mathcal{O}(1/m)$ stationarity gap for iteration count $m$.
+
+\section{Open Technical Gaps}
+\begin{itemize}
+    \item Constant-tight finite-sample bounds for unrestricted high-order feature maps.
+    \item Sharper multi-regime ($K\ge 3$) optimization/recovery guarantees in practical estimators.
+    \item External theorem review and refinement loop with mentor/professor feedback.
+\end{itemize}
+
+\end{document}

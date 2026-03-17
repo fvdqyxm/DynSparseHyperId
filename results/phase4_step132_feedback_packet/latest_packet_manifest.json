@@ -1,0 +1,20 @@
+{
+  "status": "packet_built",
+  "packet_dir": "/Users/keshavramamurthy/Berkeley/research/results/phase4_step132_feedback_packet/packet_20260312_023011",
+  "packet_tar_gz": "/Users/keshavramamurthy/Berkeley/research/results/phase4_step132_feedback_packet/packet_20260312_023011.tar.gz",
+  "n_files": 12,
+  "files": [
+    "README_PACKET.md",
+    "docs/phase4_step132_feedback_packet.md",
+    "docs/step67_viability_gate2_assessment.md",
+    "docs/step67_multiregime_upgrade_note.md",
+    "docs/deep_viability_review_2026_03_12.md",
+    "docs/step67_refit_tradeoff_analysis.md",
+    "docs/step50_viability_gate_assessment.md",
+    "tracking/phase3_steps.csv",
+    "tracking/phase4_steps.csv",
+    "tracking/phase2_steps.csv",
+    "tracking/phase1_steps.csv",
+    "proofs/latex/master.pdf"
+  ]
+}

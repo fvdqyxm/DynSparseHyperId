@@ -1,0 +1,7 @@
+{
+  "status": "ok",
+  "n_subjects": 8,
+  "mse_highorder_features": 0.12424343095990736,
+  "mse_pairwise_proxy_features": 0.12539493434034055,
+  "relative_mse_lift_pair_minus_high": 0.009183013544293833
+}

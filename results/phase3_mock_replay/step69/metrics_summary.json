@@ -1,0 +1,58 @@
+{
+  "status": "ready_for_step70",
+  "manifest": "results/phase3_mock_replay/step68/subject_manifest.csv",
+  "window": 60,
+  "step": 10,
+  "n_subjects_total": 8,
+  "n_subjects_with_window_outputs": 8,
+  "subject_reports": [
+    {
+      "subject_id": "sub-0001",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0002",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0003",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0004",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0005",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0006",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0007",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    },
+    {
+      "subject_id": "sub-0008",
+      "status": "ok",
+      "n_windows": 13,
+      "feature_dim": 170
+    }
+  ]
+}

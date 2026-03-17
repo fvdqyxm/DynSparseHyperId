@@ -1,0 +1,176 @@
+{
+  "config": {
+    "n": 10,
+    "k": 3,
+    "t": 900,
+    "sigma": 0.1,
+    "obs_noise": 0.2,
+    "seeds": [
+      6101,
+      6102,
+      6103
+    ],
+    "strategies": [
+      "kmeans_full",
+      "kmeans_delta",
+      "residual_split",
+      "window_ar_cluster",
+      "local_ar_gmm",
+      "random_blocks",
+      "random"
+    ]
+  },
+  "runs": [
+    {
+      "seed": 6101,
+      "strategy": "kmeans_full",
+      "regime_accuracy": 0.3615127919911012
+    },
+    {
+      "seed": 6101,
+      "strategy": "kmeans_delta",
+      "regime_accuracy": 0.3492769744160178
+    },
+    {
+      "seed": 6101,
+      "strategy": "residual_split",
+      "regime_accuracy": 0.36373748609566187
+    },
+    {
+      "seed": 6101,
+      "strategy": "window_ar_cluster",
+      "regime_accuracy": 0.4582869855394883
+    },
+    {
+      "seed": 6101,
+      "strategy": "local_ar_gmm",
+      "regime_accuracy": 0.4382647385984427
+    },
+    {
+      "seed": 6101,
+      "strategy": "random_blocks",
+      "regime_accuracy": 0.37374860956618466
+    },
+    {
+      "seed": 6101,
+      "strategy": "random",
+      "regime_accuracy": 0.3414905450500556
+    },
+    {
+      "seed": 6102,
+      "strategy": "kmeans_full",
+      "regime_accuracy": 0.3426028921023359
+    },
+    {
+      "seed": 6102,
+      "strategy": "kmeans_delta",
+      "regime_accuracy": 0.3403781979977753
+    },
+    {
+      "seed": 6102,
+      "strategy": "residual_split",
+      "regime_accuracy": 0.3615127919911012
+    },
+    {
+      "seed": 6102,
+      "strategy": "window_ar_cluster",
+      "regime_accuracy": 0.39933259176863184
+    },
+    {
+      "seed": 6102,
+      "strategy": "local_ar_gmm",
+      "regime_accuracy": 0.43492769744160176
+    },
+    {
+      "seed": 6102,
+      "strategy": "random_blocks",
+      "regime_accuracy": 0.5038932146829811
+    },
+    {
+      "seed": 6102,
+      "strategy": "random",
+      "regime_accuracy": 0.3503893214682981
+    },
+    {
+      "seed": 6103,
+      "strategy": "kmeans_full",
+      "regime_accuracy": 0.3526140155728587
+    },
+    {
+      "seed": 6103,
+      "strategy": "kmeans_delta",
+      "regime_accuracy": 0.3492769744160178
+    },
+    {
+      "seed": 6103,
+      "strategy": "residual_split",
+      "regime_accuracy": 0.3448275862068966
+    },
+    {
+      "seed": 6103,
+      "strategy": "window_ar_cluster",
+      "regime_accuracy": 0.38375973303670746
+    },
+    {
+      "seed": 6103,
+      "strategy": "local_ar_gmm",
+      "regime_accuracy": 0.41601779755283647
+    },
+    {
+      "seed": 6103,
+      "strategy": "random_blocks",
+      "regime_accuracy": 0.42825361512791993
+    },
+    {
+      "seed": 6103,
+      "strategy": "random",
+      "regime_accuracy": 0.3503893214682981
+    }
+  ],
+  "summary": {
+    "kmeans_full": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.3522432332220986,
+      "regime_accuracy_std": 0.007724385115313183,
+      "robust_score_mean_minus_half_std": 0.34838104066444203
+    },
+    "kmeans_delta": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.346310715609937,
+      "regime_accuracy_std": 0.004194923433068137,
+      "robust_score_mean_minus_half_std": 0.3442132538934029
+    },
+    "residual_split": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.3566926214312199,
+      "regime_accuracy_std": 0.008438862941595127,
+      "robust_score_mean_minus_half_std": 0.3524731899604223
+    },
+    "window_ar_cluster": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.41379310344827586,
+      "regime_accuracy_std": 0.03209784665603136,
+      "robust_score_mean_minus_half_std": 0.3977441801202602
+    },
+    "local_ar_gmm": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.42973674453096034,
+      "regime_accuracy_std": 0.009795954626342543,
+      "robust_score_mean_minus_half_std": 0.42483876721778907
+    },
+    "random_blocks": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.43529847979236186,
+      "regime_accuracy_std": 0.05336432734113022,
+      "robust_score_mean_minus_half_std": 0.4086163161217968
+    },
+    "random": {
+      "runs": 3,
+      "regime_accuracy_mean": 0.34742306266221723,
+      "regime_accuracy_std": 0.004194923433068136,
+      "robust_score_mean_minus_half_std": 0.34532560094568315
+    }
+  },
+  "best_strategy_by_mean_accuracy": "random_blocks",
+  "best_strategy_by_robust_score": "local_ar_gmm"
+}

@@ -1,0 +1,12 @@
+{
+  "seed": 703,
+  "rows": 16,
+  "cols": 30,
+  "alpha": 0.8,
+  "step_size": 0.9,
+  "iterations": 40,
+  "initial_objective": 88.57837990263364,
+  "final_objective": 86.55660477631912,
+  "objective_monotone_fraction": 1.0,
+  "sparsity_fraction_final": 0.0
+}

@@ -1,0 +1,23 @@
+Step #,Description,Status,Date Completed,Notes/Results,Contingency Triggered? (Y/N + details)
+1,Create private Git repo DynSparseHyperId,Completed,2026-03-11,Repo exists with git history,N
+2,Initialize README with title/core idea/timeline,Completed,2026-03-12,Placeholder removed and core summary added,N
+3,Set up Python 3.11+ virtual env,Completed,2026-03-11,Current active env is Python 3.14; migration to 3.11 flagged as robustness fix,N (risk logged: version drift)
+4,Install core dependencies (torch/pyg/pyro/numpy/scipy/matplotlib/seaborn/sympy/tqdm/wandb),Completed,2026-03-11,Imports verified in venv; added scikit-learn for sparse baselines,N
+5,Create folder structure,Completed,2026-03-11,All required directories present,N
+6,Set up Overleaf/local LaTeX master.tex,Completed,2026-03-12,Created proofs/latex/master.tex scaffold,N
+7,Initialize W&B project for logging experiments,Completed,2026-03-11,W&B smoke script present in notebooks/experiments/test_wandb_logging.py,N
+8,Read Friedman 2008 Graphical Lasso and write 1-page summary,Completed,2026-03-12,Correct paper downloaded and summary note added,Y (initial wrong PDF replaced)
+9,Read Chandrasekaran 2012 latent graphical identifiability and summarize,Completed,2026-03-12,Correct paper downloaded and summary note added,Y (initial wrong PDF replaced)
+10,Read Turnbull latent hypergraphs and summarize,Completed,2026-03-12,Summary note added with identifiability relevance and limits,N
+11,Reproduce sparse Graphical Lasso on toy Gaussian data,Completed,2026-03-12,Deterministic script implemented and executed (F1=0.9048 at sigma=0.5),N
+12,Plot recovered vs true precision and compute support F1,Completed,2026-03-12,Saved heatmap and metrics JSON under results/phase0/graphical_lasso,N
+13,Implement simple sparse LDS simulation,Completed,2026-03-12,Stable sparse LDS generator implemented and executed,N
+14,Recover A support with penalized regression,Completed,2026-03-12,LassoCV + sparsity-aware selection gives F1=0.8621 at sigma=0.5,N
+15,"Extend to pairwise regime-switching LDS (2 regimes, Markov Pi)",Completed,2026-03-12,Implemented research-grade switching pipeline (hard-EM soft-EM sticky/annealed + stability selection + oracle ceiling); in moderate observation noise (0.15) regime accuracy ~0.816 mean and support F1 ~0.791 mean across 3 seeds,N
+16,Generate Wilson-Cowan oscillator time series (N=10),Completed,2026-03-12,Implemented deterministic simulator with excitatory and inhibitory trajectories + saved artifacts (E/I arrays),N
+17,Convolve with canonical HRF for BOLD-like signals,Completed,2026-03-12,Canonical HRF convolution and noisy BOLD corruption pipeline implemented and validated via saved clean/noisy outputs,N
+18,Add regime switch (parameter jump at Markov times),Completed,2026-03-12,2-state Markov switching implemented with regime-specific sparse coupling matrices and support-Hamming separation check (~0.20),N
+19,Compute pairwise sparse recovery on simulated data,Completed,2026-03-12,Pairwise AR recovery executed on neural and BOLD observations with explicit observability diagnostics; low structural F1 reported with guardrail text (no overclaim),N
+20,Extend to static toy hypergraph reconstruction (k=3),Completed,2026-03-12,Implemented deterministic sparse k=3 polynomial inverse benchmark with noise sweep and non-triviality gate checks (single-run F1 ~0.86 at sigma=0.25),N
+21,Gate 0 check: pairwise dynamical recovery F1 > 0.75 at sigma=0.5,Completed,2026-03-12,Pairwise baseline passes strongly (F1=0.9855) and switching benchmark passes moderate-noise sweep criterion (obs-noise=0.15 mean support F1=0.7907); adversarial controls confirm no leakage-style inflation,N
+22,Gate 0 contingency pivot if failed,Completed,2026-03-12,Gate 0 succeeded; contingency path not triggered,N (closed as not-needed)

@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: DynSparseHyperId
+message: "If you use this repository, please cite it."
+type: software
+authors:
+  - family-names: Ramamurthy
+    given-names: Keshav
+  - name: DynSparseHyperId Contributors
+version: 0.1.0
+date-released: 2026-03-12
+repository-code: "https://github.com/your-org/DynSparseHyperId"
+license: MIT
